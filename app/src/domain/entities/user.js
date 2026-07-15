@@ -3,65 +3,65 @@
 const { v4: uuidv4 } = require('uuid');
 
 /**
- * User entity factory.
- * Encapsulates the shape and invariants of a User domain object.
+ * User entity — pure domain object, no framework dependencies.
  *
- * @typedef {Object} User
- * @property {string} id          - UUID v4
- * @property {string} email       - Unique email address (lowercase)
- * @property {string} passwordHash - bcrypt hash
- * @property {string} firstName
- * @property {string} lastName
- * @property {boolean} isVerified  - Whether the email has been verified
- * @property {string|null} otpCode - Current OTP (hashed or plain depending on impl)
- * @property {Date|null} otpExpiresAt
- * @property {Date} createdAt
- * @property {Date} updatedAt
+ * @typedef {Object} UserProps
+ * @property {string}  [id]         - UUID (generated if omitted)
+ * @property {string}  name         - Full name
+ * @property {string}  email        - Email address (lowercased)
+ * @property {string}  passwordHash - bcrypt hash of the password
+ * @property {boolean} [isVerified] - Whether the email has been verified
+ * @property {boolean} [isDeleted]  - Soft-delete flag
+ * @property {Date}    [createdAt]  - Creation timestamp
+ * @property {Date}    [updatedAt]  - Last-update timestamp
  */
 
-/**
- * Creates a new User entity with default values.
- *
- * @param {Object} params
- * @param {string} params.email
- * @param {string} params.passwordHash
- * @param {string} params.firstName
- * @param {string} params.lastName
- * @param {string} [params.id]
- * @returns {User}
- */
-function createUser({ email, passwordHash, firstName, lastName, id }) {
-  const now = new Date();
-  return {
-    id: id || uuidv4(),
-    email: email.toLowerCase().trim(),
-    passwordHash,
-    firstName: firstName.trim(),
-    lastName: lastName.trim(),
-    isVerified: false,
-    otpCode: null,
-    otpExpiresAt: null,
-    createdAt: now,
-    updatedAt: now,
-  };
+class User {
+  /**
+   * @param {UserProps} props
+   */
+  constructor({ id, name, email, passwordHash, isVerified = false, isDeleted = false, createdAt, updatedAt } = {}) {
+    this.id = id || uuidv4();
+    this.name = name;
+    this.email = email ? email.toLowerCase().trim() : email;
+    this.passwordHash = passwordHash;
+    this.isVerified = isVerified;
+    this.isDeleted = isDeleted;
+    this.createdAt = createdAt || new Date();
+    this.updatedAt = updatedAt || new Date();
+  }
+
+  /**
+   * Returns a safe public representation (no password hash).
+   * @returns {Object}
+   */
+  toPublic() {
+    return {
+      id: this.id,
+      name: this.name,
+      email: this.email,
+      isVerified: this.isVerified,
+      createdAt: this.createdAt,
+    };
+  }
+
+  /**
+   * Reconstruct a User from a database row.
+   * @param {Object} row
+   * @returns {User}
+   */
+  static fromRow(row) {
+    return new User({
+      id: row.id,
+      name: row.name,
+      email: row.email,
+      passwordHash: row.password_hash,
+      isVerified: row.is_verified,
+      isDeleted: row.is_deleted,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    });
+  }
 }
 
-/**
- * Returns a safe public representation of a user (no sensitive fields).
- *
- * @param {User} user
- * @returns {Object}
- */
-function toPublicUser(user) {
-  return {
-    id: user.id,
-    email: user.email,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    isVerified: user.isVerified,
-    createdAt: user.createdAt,
-    updatedAt: user.updatedAt,
-  };
-}
-
-module.exports = { createUser, toPublicUser };
+module.exports = User;
