@@ -1,0 +1,216 @@
+openspec: '1.0'
+story:
+  id: US-010
+  title: Submit OTP to Complete Login
+  description: As a compliance officer, I want to generate reports summarizing account
+    deletion activities and third-party notification compliance, so that I can prepare
+    for audits and monitor ongoing regulatory adherence.
+  feature:
+    id: F-02
+    title: OTP Verification
+  epic:
+    id: EP-002
+    title: OTP Input and Verification
+  status: draft
+functional_requirement:
+  description: '## S-001
+
+
+    ### Purpose
+
+    This specification details the features required for the User Management Service
+    to generate and manage compliance reports related to account deletions and third-party
+    notifications for audit preparation and regulatory monitoring.
+
+
+    ### Scope
+
+    This specification focuses on the capabilities required within the User Management
+    Service to generate, view, and export compliance reports for account deletion
+    activities.
+
+
+    ### Non-Goals
+
+    1. Implementation of user authentication processes.
+
+    2. Design of UI components for report interaction.
+
+    3. Backend infrastructure decisions for data storage.
+
+    4. API endpoint design and implementation.
+
+    5. Management of compliance obligations outside deletion activities.
+
+
+    ### Key Entities
+
+    - **ComplianceReport**: Attributes include `reportId` (string), `dateRange` (date),
+    `totalDeletions` (integer), `successfulCompletions` (integer), `failures` (integer),
+    `notificationComplianceRate` (float), `summaryStatistics` (string).
+
+    - **ComplianceOfficer**: Attributes include `userId` (string), `role` (string),
+    related to ComplianceReport (one-to-many).
+
+
+    ### Functional Requirements
+
+    - **FR-001**: User Management Service SHALL allow compliance officers to specify
+    a date range when requesting a compliance report.
+
+    - **FR-002**: User Management Service MUST generate a report that includes total
+    deletions, successful completions, and failures.
+
+    - **FR-003**: User Management Service SHALL present notification compliance rates
+    against a 24-hour SLA in the report.
+
+    - **FR-004**: User Management Service MUST allow exports of compliance reports
+    into an exportable format for auditor review.
+
+    - **FR-005**: User Management Service SHALL provide both summary statistics and
+    a detailed breakdown in generated reports.
+
+    - **FR-006**: User Management Service MUST log the completion of report generation
+    into the audit trail.
+
+
+    ### Assumptions Propagation
+
+    - **A-001**: Compliance Officer is authenticated and authorized before requesting
+    reports. (FR-001, FR-006)
+
+    - **A-002**: Analytics data required for reports is accessible and up-to-date.
+    (FR-002, FR-003, FR-005)
+
+    - **A-003**: Exportable format implies compatibility with common reporting standards
+    (CSV, PDF). (FR-004)
+
+
+    ### Success Criteria
+
+    - **SC-001**: Percentage of compliance reports including correct data equals 100%.
+
+    - **SC-002**: Compliance reports generated with correct data within the specified
+    date range equals 100%.
+
+    - **SC-003**: Reporting of notification compliance rate greater than 95% accuracy.
+
+
+    ### Priority Levels
+
+    - **P1**: FR-001, FR-002, FR-005
+
+    - **P2**: FR-003, FR-004, FR-006
+
+
+    ### Edge Cases
+
+    - **EC-001**: Given invalid date range, When a report is requested, Then notify
+    user of input error.
+
+    - **EC-002**: Given a large data set, When generating report, Then ensure performance
+    does not degrade significantly.
+
+    - **EC-003**: Given incomplete data, When generating report, Then highlight missing
+    sections.
+
+
+    ### Independent Testability
+
+    - **Preconditions**: Valid user is authenticated; Compliance data is available;
+    Report generation functionality is active.
+
+    - **User Action**: Request report generation with valid date range.
+
+    - **Outcome**: Valid report includes required data and is logged successfully.
+
+
+    ### Separation of Concerns
+
+    Behavior descriptions focus on what the system accomplishes through its features,
+    prioritizing user benefits and compliance monitoring needs, whilst separating
+    technical implementations like API specifics. This specification outlines capabilities
+    pertinent to the User Management Service, allowing effective testing and integration
+    into compliance workflows.'
+  acceptance_criteria:
+  - given_when_then: Given a compliance officer is authenticated and authorized, When
+      they request a deletion compliance report, Then they can specify a date range
+      for the report
+  - given_when_then: Given a compliance report has been generated, When the officer
+      views the report, Then it includes total deletions, successful completions,
+      and any failures
+  - given_when_then: Given a compliance report has been generated, When the officer
+      views the report, Then it shows third-party notification compliance rate against
+      the 24-hour SLA
+  - given_when_then: Given a compliance officer needs the report for auditor review,
+      When they request an export, Then the report can be generated in an exportable
+      format
+  - given_when_then: Given a compliance report has been generated, When the officer
+      views the report, Then it includes summary statistics and a detailed breakdown
+  - given_when_then: Given a compliance officer generates a report, When the report
+      generation completes, Then the action is logged in the audit trail
+  epic_acceptance_criteria:
+  - given_when_then: Given a user requests account deletion, then all their personal
+      data is removed from the system
+  - given_when_then: Given a user account is deleted, then all third-party services
+      are notified within 24 hours
+  - given_when_then: Given an audit, then the system provides a complete log of all
+      data deletion activities
+technical_design:
+  description: "## S-001\n\n### Contracts & Interfaces\n\n#### API Contract\n- **New\
+    \ Endpoint**: `GET /api/v1/compliance/reports`\n  - **Parameters**:\n    - `startDate`\
+    \ (required): Must be a date string in `YYYY-MM-DD` format\n    - `endDate` (required):\
+    \ Must be a date string in `YYYY-MM-DD` format\n  - **Response**:\n    - `200\
+    \ OK`: Returns JSON object containing compliance report\n    - `400 Bad Request`:\
+    \ Returned if date range is invalid\n    - `500 Internal Server Error`: Returned\
+    \ if an unexpected error occurs\n\n#### Data Model Changes\n- **New Table**: `ComplianceReport`\n\
+    \  - `reportId`: `VARCHAR(36)` primary key\n  - `dateRange`: `DATE[]`\n  - `totalDeletions`:\
+    \ `INTEGER`\n  - `successfulCompletions`: `INTEGER`\n  - `failures`: `INTEGER`\n\
+    \  - `notificationComplianceRate`: `FLOAT`\n  - `summaryStatistics`: `TEXT`\n\
+    \  - Index: Composite index on `dateRange`\n\n- **Updated Table**: `AuditTrail`\n\
+    \  - Add column `actionType`: `VARCHAR(50)`, indexed\n\n### Test Strategy\n####\
+    \ Test Cases\n1. **Report Generation Validity**\n   - Validate correct report\
+    \ data for a valid date range (`startDate`, `endDate`).\n   - Expected outcome:\
+    \ `response.totalDeletions > 0`\n\n2. **Invalid Date Range Handling**\n   - Submit\
+    \ request with `endDate` prior to `startDate`.\n   - Expected outcome: `400 Bad\
+    \ Request`\n\n3. **Export Functionality**\n   - Ensure reports can be exported\
+    \ to CSV and PDF.\n   - Expected outcome: File content matches report data.\n\n\
+    4. **Performance for Large Data Sets**\n   - Validate performance does not degrade\
+    \ for large datasets.\n   - Expected outcome: Report generation time < 500ms\n\
+    \n5. **Audit Logging**\n   - Confirm report generation logs are created in the\
+    \ `AuditTrail`.\n   - Expected outcome: New entry with `actionType` = \"ReportGenerated\"\
+    \n\n### Implementation Approach\n\n#### Core Implementation Logic\n- **Class**:\
+    \ `ComplianceReportService`\n  - **Method**: `generateReport(startDate, endDate)`\n\
+    \    - **Algorithm**:\n      1. Validate date range\n      2. Aggregate data from\
+    \ deletion logs\n      3. Calculate `notificationComplianceRate`\n      4. Populate\
+    \ `ComplianceReport` object and save to the database\n      5. Log action in `AuditTrail`\n\
+    \n- **Class**: `ReportExporter`\n  - **Method**: `exportToFormat(reportId, format)`\n\
+    \    - Supports CSV and PDF file generation for compliance audits\n\n#### Inter-Service\
+    \ Calls\n- Utilize **async REST requests** to fetch data from `DeletionLogService`\
+    \ and `NotificationService` for accurate real-time report generation.\n\n### Architectural\
+    \ Decision Records (ADRs)\n- **ADR-001**: Title: Use of Composite Index for Date\
+    \ Range Queries\n  - **Context**: Improve lookup efficiency for report generation.\n\
+    \  - **Decision**: Implement composite index on `dateRange`.\n  - **Rationale**:\
+    \ Faster retrieval for reports spanning specific date ranges.\n  - **Alternative**:\
+    \ Simple index on start date, but rejected due to inefficiencies.\n\n- **ADR-002**:\
+    \ Title: Report Export Formats\n  - **Context**: Need for standardized compliance\
+    \ report export.\n  - **Decision**: Support CSV and PDF for export.\n  - **Rationale**:\
+    \ Industry-standard formats; wide acceptance.\n  - **Alternative**: JSON export,\
+    \ rejected due to lower audit-readiness.\n\n### Simplicity Gate Assessment\n-\
+    \ **Assessment**: `appropriate`\n  - All technical elements correspond directly\
+    \ to functional requirements, serving clear audit and compliance objectives.\n\
+    \n### Affected Services and API Changes\n- **Affected Service**: User Management\
+    \ Service\n- **API Change**:\n  - Introduced `GET /api/v1/compliance/reports`\
+    \ for report generation and export."
+  affected_services:
+  - id: S-001
+  api_changes:
+  - service: S-001
+    endpoint: /api/v1/reports/deletion-compliance
+    method: POST
+    change_type: new
+  - service: S-001
+    endpoint: /api/v1/reports/deletion-compliance
+    method: GET
+    change_type: new
+gaps: []
