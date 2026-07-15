@@ -1,0 +1,7 @@
+- [ ] Update `app/src/application/userService.js`: Implement registration logic with password hashing and email OTP.
+- [ ] Modify `app/src/adapters/inbound/http/userRouter.js`: Add a route for `/register` to handle new user registration.
+- [ ] Extend `app/src/adapters/outbound/email/nodemailerEmailService.js`: Implement email sending functionality for OTPs.
+- [ ] Adjust `app/src/infrastructure/db/pool.js` or related SQL files: Modify schema if necessary to store additional verification data.
+- [ ] Write unit tests in `app/tests/userService.test.js`: Ensure registration logic is robust and includes OTP sending and verification.
+- [ ] Create documentation entries for the new registration process in the relevant markdown files within the repo.
+- [ ] Review the new changes with a security advisor to ensure the system is resistant to vulnerabilities.

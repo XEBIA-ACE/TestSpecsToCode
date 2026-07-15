@@ -1,52 +1,39 @@
+```javascript
 'use strict';
 
 const nodemailer = require('nodemailer');
-const config = require('../../../config/env');
-const logger = require('../../../infrastructure/logger');
+const config = require('../../config/env'); // Ensure this is configured with your environment variables
 
-/**
- * Nodemailer implementation of the EmailService port.
- */
 class NodemailerEmailService {
   constructor() {
     this.transporter = nodemailer.createTransport({
-      host: config.email.host,
-      port: config.email.port,
-      secure: config.email.secure,
-      auth: config.email.user
-        ? { user: config.email.user, pass: config.email.pass }
-        : undefined,
+      host: config.smtpHost,
+      port: config.smtpPort,
+      secure: config.smtpSecure, // true for 465, false for other ports
+      auth: {
+        user: config.smtpUser, // generated ethereal user
+        pass: config.smtpPass, // generated ethereal password
+      },
     });
   }
 
-  /**
-   * Send a verification OTP email.
-   *
-   * @param {string} to   - Recipient email address
-   * @param {string} otp  - One-time password
-   * @returns {Promise<void>}
-   */
-  async sendOtp(to, otp) {
-    const mailOptions = {
-      from: config.email.from,
-      to,
-      subject: 'Your verification code',
-      text: `Your one-time verification code is: ${otp}\n\nIt expires in ${config.otp.expiryMinutes} minutes.`,
-      html: `
-        <p>Your one-time verification code is:</p>
-        <h2 style="letter-spacing:4px">${otp}</h2>
-        <p>It expires in <strong>${config.otp.expiryMinutes} minutes</strong>.</p>
-      `,
-    };
-
+  async sendOtpEmail(to, otp) {
     try {
-      await this.transporter.sendMail(mailOptions);
-      logger.info(`OTP email sent to ${to}`);
-    } catch (err) {
-      logger.error(`Failed to send OTP email to ${to}`, { message: err.message });
-      throw err;
+      const mailOptions = {
+        from: config.emailFrom,
+        to,
+        subject: 'Your OTP Code',
+        text: `Your OTP code is: ${otp}`,
+      };
+
+      const info = await this.transporter.sendMail(mailOptions);
+      console.log('Message sent: %s', info.messageId);
+    } catch (error) {
+      console.error('Error sending OTP email:', error);
+      throw new Error('Failed to send OTP email');
     }
   }
 }
 
-module.exports = NodemailerEmailService;
+module.exports = new NodemailerEmailService();
+```

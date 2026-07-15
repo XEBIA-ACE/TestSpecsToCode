@@ -1,52 +1,36 @@
 'use strict';
 
-const { body, param, validationResult } = require('express-validator');
+const { body } = require('express-validator');
 
 /**
- * Middleware: collect express-validator errors and respond 422 if any.
+ * Validation rules for the POST /register endpoint.
  *
- * @param {import('express').Request}  req
- * @param {import('express').Response} res
- * @param {import('express').NextFunction} next
+ * Validates:
+ *  - name:     required, non-empty string, 1–100 chars
+ *  - email:    required, valid email format
+ *  - password: required, min 8 chars (security baseline)
  */
-function validate(req, res, next) {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(422).json({ errors: errors.array() });
-  }
-  next();
-}
+const registerValidationRules = [
+  body('name')
+    .trim()
+    .notEmpty()
+    .withMessage('Name is required')
+    .isLength({ min: 1, max: 100 })
+    .withMessage('Name must be between 1 and 100 characters'),
 
-const registerRules = [
-  body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
-  body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
-  body('firstName').notEmpty().trim().withMessage('First name is required'),
-  body('lastName').notEmpty().trim().withMessage('Last name is required'),
+  body('email')
+    .trim()
+    .notEmpty()
+    .withMessage('Email is required')
+    .isEmail()
+    .withMessage('Email must be a valid email address')
+    .normalizeEmail(),
+
+  body('password')
+    .notEmpty()
+    .withMessage('Password is required')
+    .isLength({ min: 8 })
+    .withMessage('Password must be at least 8 characters long'),
 ];
 
-const loginRules = [
-  body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
-  body('password').notEmpty().withMessage('Password is required'),
-];
-
-const verifyOtpRules = [
-  body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
-  body('otp').notEmpty().withMessage('OTP is required'),
-];
-
-const resendOtpRules = [
-  body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
-];
-
-const userIdRules = [
-  param('id').isUUID().withMessage('User ID must be a valid UUID'),
-];
-
-module.exports = {
-  validate,
-  registerRules,
-  loginRules,
-  verifyOtpRules,
-  resendOtpRules,
-  userIdRules,
-};
+module.exports = { registerValidationRules };
