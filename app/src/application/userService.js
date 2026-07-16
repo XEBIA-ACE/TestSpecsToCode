@@ -1,193 +1,65 @@
 'use strict';
 
-const bcrypt = require('bcrypt');
-const { v4: uuidv4 } = require('uuid');
-const { createUser, toPublicUser } = require('../domain/entities/user');
-const {
-  ConflictError,
-  NotFoundError,
-  UnauthorizedError,
-  AccountNotVerifiedError,
-  InvalidOtpError,
-} = require('../domain/errors/domainErrors');
-const config = require('../config/env');
-
-const SALT_ROUNDS = 12;
+const User = require('../domain/entities/user');
+const { UserNotFoundError, ServiceUnavailableError } = require('../domain/errors/domainErrors');
+const logger = require('../infrastructure/logger');
 
 /**
- * Application service — orchestrates domain logic.
- * Depends on outbound ports (repository + email) injected via constructor.
+ * UserService — application-layer use-case orchestration.
+ *
+ * Depends on a userRepository that implements the outbound repository port.
+ * The repository is injected at construction time to keep this class testable.
  */
 class UserService {
   /**
-   * @param {Object} deps
-   * @param {import('../ports/outbound/userRepositoryPort')} deps.userRepository
-   * @param {import('../ports/outbound/emailServicePort')}  deps.emailService
+   * @param {{ findById: (id: string) => Promise<object|null> }} userRepository
    */
-  constructor({ userRepository, emailService }) {
+  constructor(userRepository) {
     this.userRepository = userRepository;
-    this.emailService = emailService;
-  }
-
-  // ── Registration ──────────────────────────────────────────────────────
-
-  /**
-   * Register a new user.
-   *
-   * @param {{ email: string, password: string, firstName: string, lastName: string }} input
-   * @returns {Promise<Object>} Public user representation
-   */
-  async register({ email, password, firstName, lastName }) {
-    const existing = await this.userRepository.findByEmail(email);
-    if (existing) {
-      throw new ConflictError('A user with this email already exists');
-    }
-
-    const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
-    const user = createUser({ email, passwordHash, firstName, lastName });
-
-    // Generate and attach OTP
-    const { otp, otpHash, otpExpiresAt } = this._generateOtp();
-    user.otpCode = otpHash;
-    user.otpExpiresAt = otpExpiresAt;
-
-    const saved = await this.userRepository.save(user);
-
-    // Fire-and-forget email (errors are logged but don't fail registration)
-    this.emailService.sendOtp(saved.email, otp).catch(() => {});
-
-    return toPublicUser(saved);
-  }
-
-  // ── Login ─────────────────────────────────────────────────────────────
-
-  /**
-   * Authenticate a user.
-   *
-   * @param {{ email: string, password: string }} input
-   * @returns {Promise<{ user: Object }>}
-   */
-  async login({ email, password }) {
-    const user = await this.userRepository.findByEmail(email);
-    if (!user) {
-      throw new UnauthorizedError('Invalid email or password');
-    }
-
-    const passwordMatch = await bcrypt.compare(password, user.passwordHash);
-    if (!passwordMatch) {
-      throw new UnauthorizedError('Invalid email or password');
-    }
-
-    if (!user.isVerified) {
-      throw new AccountNotVerifiedError();
-    }
-
-    return { user: toPublicUser(user) };
-  }
-
-  // ── OTP Verification ──────────────────────────────────────────────────
-
-  /**
-   * Verify a user's email with an OTP.
-   *
-   * @param {{ email: string, otp: string }} input
-   * @returns {Promise<Object>} Updated public user
-   */
-  async verifyOtp({ email, otp }) {
-    const user = await this.userRepository.findByEmail(email);
-    if (!user) {
-      throw new NotFoundError('User not found');
-    }
-
-    if (!user.otpCode || !user.otpExpiresAt) {
-      throw new InvalidOtpError();
-    }
-
-    if (new Date() > new Date(user.otpExpiresAt)) {
-      throw new InvalidOtpError('OTP has expired');
-    }
-
-    const otpMatch = await bcrypt.compare(otp, user.otpCode);
-    if (!otpMatch) {
-      throw new InvalidOtpError('OTP is incorrect');
-    }
-
-    user.isVerified = true;
-    user.otpCode = null;
-    user.otpExpiresAt = null;
-    user.updatedAt = new Date();
-
-    const updated = await this.userRepository.update(user);
-    return toPublicUser(updated);
-  }
-
-  // ── Resend OTP ────────────────────────────────────────────────────────
-
-  /**
-   * Resend a verification OTP.
-   *
-   * @param {{ email: string }} input
-   * @returns {Promise<void>}
-   */
-  async resendOtp({ email }) {
-    const user = await this.userRepository.findByEmail(email);
-    if (!user) {
-      throw new NotFoundError('User not found');
-    }
-
-    const { otp, otpHash, otpExpiresAt } = this._generateOtp();
-    user.otpCode = otpHash;
-    user.otpExpiresAt = otpExpiresAt;
-    user.updatedAt = new Date();
-
-    await this.userRepository.update(user);
-    await this.emailService.sendOtp(user.email, otp);
-  }
-
-  // ── Account Management ────────────────────────────────────────────────
-
-  /**
-   * Get a user by ID.
-   *
-   * @param {string} id
-   * @returns {Promise<Object>}
-   */
-  async getUserById(id) {
-    const user = await this.userRepository.findById(id);
-    if (!user) {
-      throw new NotFoundError('User not found');
-    }
-    return toPublicUser(user);
   }
 
   /**
-   * Delete a user account.
+   * Retrieve account information for the given user ID.
    *
-   * @param {string} id
-   * @returns {Promise<void>}
+   * Returns the data shape required by the GET /me/account endpoint:
+   *   { name, email, registrationDate, accountStatus }
+   *
+   * @param {string} userId - UUID of the authenticated user
+   * @returns {Promise<{ name: string, email: string, registrationDate: string, accountStatus: string }>}
+   * @throws {UserNotFoundError}   when no user exists for the given ID
+   * @throws {ServiceUnavailableError} when the database is unreachable
    */
-  async deleteUser(id) {
-    const user = await this.userRepository.findById(id);
-    if (!user) {
-      throw new NotFoundError('User not found');
+  async getAccountInfo(userId) {
+    let rawUser;
+
+    try {
+      rawUser = await this.userRepository.findById(userId);
+    } catch (err) {
+      logger.error('UserService.getAccountInfo — repository error', {
+        userId,
+        error: err.message,
+        stack: err.stack,
+      });
+      throw new ServiceUnavailableError('Unable to retrieve account information at this time');
     }
-    await this.userRepository.deleteById(id);
-  }
 
-  // ── Private helpers ───────────────────────────────────────────────────
+    if (!rawUser) {
+      throw new UserNotFoundError(`User with id ${userId} not found`);
+    }
 
-  /**
-   * Generate a numeric OTP, its bcrypt hash, and expiry timestamp.
-   *
-   * @returns {{ otp: string, otpHash: string, otpExpiresAt: Date }}
-   */
-  _generateOtp() {
-    const length = config.otp.length;
-    const otp = Array.from({ length }, () => Math.floor(Math.random() * 10)).join('');
-    // Synchronous hash is acceptable for short OTPs
-    const otpHash = bcrypt.hashSync(otp, 10);
-    const otpExpiresAt = new Date(Date.now() + config.otp.expiryMinutes * 60 * 1000);
-    return { otp, otpHash, otpExpiresAt };
+    // Map raw DB row → domain entity → response DTO
+    const user = new User({
+      id: rawUser.id,
+      firstName: rawUser.first_name ?? rawUser.firstName ?? '',
+      lastName: rawUser.last_name ?? rawUser.lastName ?? '',
+      email: rawUser.email,
+      isVerified: rawUser.is_verified ?? rawUser.isVerified ?? false,
+      isDeleted: rawUser.is_deleted ?? rawUser.isDeleted ?? false,
+      createdAt: rawUser.created_at ?? rawUser.createdAt,
+      updatedAt: rawUser.updated_at ?? rawUser.updatedAt,
+    });
+
+    return user.toAccountInfo();
   }
 }
 

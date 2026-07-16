@@ -129,18 +129,116 @@ docker compose up
 
 | Method | Path | Description |
 |--------|------|-------------|
-| POST | `/api/v1/users/register` | Register a new user |
-| POST | `/api/v1/users/login` | Authenticate a user |
-| POST | `/api/v1/users/verify-otp` | Verify email with OTP |
-| POST | `/api/v1/users/resend-otp` | Resend verification OTP |
-| GET | `/api/v1/users/:id` | Get user profile |
-| DELETE | `/api/v1/users/:id` | Delete user account |
+| POST | `/api/v1/users/register` | Register a new user account |
+| POST | `/api/v1/users/login` | Authenticate user credentials |
+| GET | `/api/v1/users/me/account` | Retrieve authenticated user's account information |
+
+---
+
+## GET /api/v1/users/me/account
+
+Retrieves the account information for the currently authenticated user.
+
+### Authentication
+
+This endpoint requires a valid JWT Bearer token in the Authorization header.
+
+### Request Headers
+
+| Header | Value | Required |
+|--------|-------|----------|
+| Authorization | `Bearer <JWT>` | Yes |
+| Accept | `application/json` | No |
+
+### Successful Response
+
+**Status Code:** `200 OK`
+
+**Response Body:**
+
+```json
+{
+  "data": {
+    "name": "Alice Smith",
+    "email": "alice@example.com",
+    "registrationDate": "2024-01-15T10:30:00Z",
+    "accountStatus": "Verified"
+  }
+}
+```
+
+**Response Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `data.name` | string | User's full name (firstName + lastName) |
+| `data.email` | string | User's registered email address |
+| `data.registrationDate` | string | ISO 8601 formatted date when the account was created |
+| `data.accountStatus` | string | Account verification status: `"Verified"` or `"Pending Verification"` |
+
+**Response Headers:**
+
+```
+Content-Type: application/json
+Cache-Control: no-store, no-cache, must-revalidate
+Pragma: no-cache
+```
+
+### Error Responses
+
+| Status Code | Description | Response Body |
+|-------------|-------------|---------------|
+| 401 Unauthorized | Missing, invalid, or expired JWT token | `{"error": "Session expired. Please log in again."}` |
+| 404 Not Found | User account not found in database | `{"error": "Account not found"}` |
+| 500 Internal Server Error | Unexpected server error | `{"error": "An unexpected error occurred"}` |
+
+### Example Request
+
+```bash
+curl -X GET "https://api.example.com/api/v1/users/me/account" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
+  -H "Accept: application/json"
+```
+
+### Example Successful Response
+
+```bash
+HTTP/1.1 200 OK
+Content-Type: application/json
+Cache-Control: no-store, no-cache, must-revalidate
+
+{
+  "data": {
+    "name": "Alice Smith",
+    "email": "alice@example.com",
+    "registrationDate": "2024-01-15T10:30:00Z",
+    "accountStatus": "Verified"
+  }
+}
+```
+
+### Example Error Response (Unauthorized)
+
+```bash
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+
+{
+  "error": "Session expired. Please log in again."
+}
+```
+
+### Notes
+
+- Each successful access to this endpoint generates an audit log entry for compliance and security monitoring
+- The endpoint returns read-only account information; modifications are not supported through this endpoint
+- All data transmission must occur over HTTPS in production environments
 
 ---
 
 ## Environment Variables
 
-See [.env.example](.env.example) for the full list.
+See `.env.example` for the full list of configuration options.
 
 ---
 
@@ -150,7 +248,7 @@ See [.env.example](.env.example) for the full list.
 # Run all tests
 npm test
 
-# With coverage
+# Run tests with coverage
 npm run test:coverage
 ```
 

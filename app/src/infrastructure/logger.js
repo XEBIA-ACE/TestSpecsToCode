@@ -1,24 +1,23 @@
 'use strict';
 
-const winston = require('winston');
-const config = require('../config/env');
+const { createLogger, format, transports } = require('winston');
 
-const logger = winston.createLogger({
-  level: config.logLevel,
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.errors({ stack: true }),
-    config.nodeEnv === 'production'
-      ? winston.format.json()
-      : winston.format.combine(
-          winston.format.colorize(),
-          winston.format.printf(({ timestamp, level, message, ...meta }) => {
-            const metaStr = Object.keys(meta).length ? ` ${JSON.stringify(meta)}` : '';
-            return `${timestamp} [${level}]: ${message}${metaStr}`;
-          })
-        )
+/**
+ * Shared Winston logger instance for structured logging.
+ * Log level is controlled via the LOG_LEVEL environment variable.
+ */
+const logger = createLogger({
+  level: process.env.LOG_LEVEL || 'info',
+  format: format.combine(
+    format.timestamp({ format: 'YYYY-MM-DDTHH:mm:ss.SSSZ' }),
+    format.errors({ stack: true }),
+    format.json()
   ),
-  transports: [new winston.transports.Console()],
+  transports: [
+    new transports.Console({
+      silent: process.env.NODE_ENV === 'test',
+    }),
+  ],
 });
 
 module.exports = logger;

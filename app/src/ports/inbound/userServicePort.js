@@ -1,104 +1,71 @@
 'use strict';
 
 /**
- * Inbound port — UserService interface.
+ * @fileoverview Inbound port interface for the User Service.
  *
- * This file documents the contract that the application layer must fulfil.
- * Concrete implementations live in src/application/userService.js.
+ * Defines the contract that any inbound adapter (e.g. HTTP controller) must
+ * rely on when interacting with the application layer.  Concrete
+ * implementations live in `app/src/application/userService.js`.
+ *
+ * Following hexagonal-architecture conventions this file contains only the
+ * interface description (JSDoc typedef + abstract method stubs).  No business
+ * logic is placed here.
+ */
+
+/**
+ * Shape of the account-information object returned by {@link IUserService#getAccountInfo}.
+ *
+ * @typedef {object} AccountInfo
+ * @property {string} name             - User's full name (firstName + " " + lastName).
+ * @property {string} email            - User's registered email address.
+ * @property {string} registrationDate - ISO 8601 timestamp of when the account was created.
+ * @property {string} accountStatus    - Human-readable verification status:
+ *                                       `"Verified"` or `"Pending Verification"`.
+ */
+
+/**
+ * Inbound port interface — User Service.
+ *
+ * Any class that acts as the application-layer entry point for user-related
+ * use-cases must implement this interface.
  *
  * @interface IUserService
  */
 
 /**
- * @typedef {Object} RegisterInput
- * @property {string} email
- * @property {string} password
- * @property {string} firstName
- * @property {string} lastName
- */
-
-/**
- * @typedef {Object} LoginInput
- * @property {string} email
- * @property {string} password
- */
-
-/**
- * @typedef {Object} VerifyOtpInput
- * @property {string} email
- * @property {string} otp
- */
-
-/**
- * @typedef {Object} ResendOtpInput
- * @property {string} email
- */
-
-/**
- * @typedef {Object} PublicUser
- * @property {string} id
- * @property {string} email
- * @property {string} firstName
- * @property {string} lastName
- * @property {boolean} isVerified
- * @property {Date} createdAt
- * @property {Date} updatedAt
- */
-
-/**
- * Register a new user.
+ * Retrieves account information for the specified user.
+ *
+ * Looks up the user record identified by `userId`, derives the human-readable
+ * `accountStatus` from the stored `isVerified` flag, and returns a sanitised
+ * view of the account data suitable for display on the dashboard.
+ *
  * @function
- * @name IUserService#register
- * @param {RegisterInput} input
- * @returns {Promise<PublicUser>}
- * @throws {ConflictError} if email already exists
+ * @name IUserService#getAccountInfo
+ * @async
+ *
+ * @param {string} userId - UUID of the user whose account information is
+ *                          being requested.  Must be a non-empty string that
+ *                          corresponds to an existing record in the users table.
+ *
+ * @returns {Promise<AccountInfo>} Resolves with an {@link AccountInfo} object
+ *   containing:
+ *   - `name`             {string} — full name composed from firstName and lastName
+ *   - `email`            {string} — registered email address
+ *   - `registrationDate` {string} — account creation date in ISO 8601 format
+ *   - `accountStatus`    {string} — `"Verified"` when the account has been
+ *                                   email-verified; `"Pending Verification"` otherwise
+ *
+ * @throws {NotFoundError} When no user record exists for the supplied `userId`.
+ *   Callers should map this to an HTTP 404 response.
+ * @throws {Error} For unexpected infrastructure failures (e.g. database
+ *   unavailability).  Callers should map these to an HTTP 500 response.
+ *
+ * @example
+ * // Typical usage inside an HTTP controller:
+ * const accountInfo = await userService.getAccountInfo(req.user.id);
+ * res.status(200).json({ data: accountInfo });
  */
 
-/**
- * Authenticate a user.
- * @function
- * @name IUserService#login
- * @param {LoginInput} input
- * @returns {Promise<{ user: PublicUser, token: string }>}
- * @throws {UnauthorizedError} if credentials are invalid
- * @throws {AccountNotVerifiedError} if account is not verified
- */
-
-/**
- * Verify a user's email with an OTP.
- * @function
- * @name IUserService#verifyOtp
- * @param {VerifyOtpInput} input
- * @returns {Promise<PublicUser>}
- * @throws {InvalidOtpError}
- */
-
-/**
- * Resend a verification OTP.
- * @function
- * @name IUserService#resendOtp
- * @param {ResendOtpInput} input
- * @returns {Promise<void>}
- * @throws {NotFoundError}
- */
-
-/**
- * Get a user by ID.
- * @function
- * @name IUserService#getUserById
- * @param {string} id
- * @returns {Promise<PublicUser>}
- * @throws {NotFoundError}
- */
-
-/**
- * Delete a user account.
- * @function
- * @name IUserService#deleteUser
- * @param {string} id
- * @returns {Promise<void>}
- * @throws {NotFoundError}
- */
-
-// This file is intentionally documentation-only (no runtime exports needed).
-module.exports = {};
+// NOTE: This file intentionally exports nothing — it is a documentation-only
+// interface definition.  The concrete implementation is in:
+//   app/src/application/userService.js

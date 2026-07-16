@@ -1,17 +1,16 @@
 'use strict';
 
 /**
- * Domain-specific error types.
- * These are thrown by the application layer and caught by the HTTP adapter
- * to produce appropriate HTTP status codes.
+ * Domain-specific error classes for the User Management Service.
+ * All errors extend the base DomainError to allow consistent handling.
  */
 
 class DomainError extends Error {
   /**
-   * @param {string} message
-   * @param {number} statusCode
+   * @param {string} message - Human-readable error message
+   * @param {number} statusCode - HTTP status code to return
    */
-  constructor(message, statusCode = 400) {
+  constructor(message, statusCode = 500) {
     super(message);
     this.name = this.constructor.name;
     this.statusCode = statusCode;
@@ -19,60 +18,54 @@ class DomainError extends Error {
   }
 }
 
-/** Thrown when a resource is not found. */
-class NotFoundError extends DomainError {
-  /** @param {string} [message] */
-  constructor(message = 'Resource not found') {
+/** Thrown when a requested user cannot be found. */
+class UserNotFoundError extends DomainError {
+  constructor(message = 'User not found') {
     super(message, 404);
   }
 }
 
-/** Thrown when a conflict exists (e.g. duplicate email). */
-class ConflictError extends DomainError {
-  /** @param {string} [message] */
-  constructor(message = 'Resource already exists') {
-    super(message, 409);
-  }
-}
-
-/** Thrown when credentials are invalid. */
+/** Thrown when authentication credentials are invalid or missing. */
 class UnauthorizedError extends DomainError {
-  /** @param {string} [message] */
   constructor(message = 'Unauthorized') {
     super(message, 401);
   }
 }
 
-/** Thrown when the account is not yet verified. */
-class AccountNotVerifiedError extends DomainError {
-  /** @param {string} [message] */
-  constructor(message = 'Account email is not verified') {
+/** Thrown when a user attempts an action they are not permitted to perform. */
+class ForbiddenError extends DomainError {
+  constructor(message = 'Forbidden') {
     super(message, 403);
   }
 }
 
-/** Thrown when an OTP is invalid or expired. */
-class InvalidOtpError extends DomainError {
-  /** @param {string} [message] */
-  constructor(message = 'OTP is invalid or has expired') {
-    super(message, 400);
+/** Thrown when a duplicate resource (e.g. email) already exists. */
+class ConflictError extends DomainError {
+  constructor(message = 'Conflict') {
+    super(message, 409);
   }
 }
 
-/** Thrown for general validation failures. */
+/** Thrown when input validation fails at the domain layer. */
 class ValidationError extends DomainError {
-  /** @param {string} [message] */
   constructor(message = 'Validation failed') {
     super(message, 422);
   }
 }
 
+/** Thrown when the database or an external service is unavailable. */
+class ServiceUnavailableError extends DomainError {
+  constructor(message = 'Service unavailable') {
+    super(message, 503);
+  }
+}
+
 module.exports = {
   DomainError,
-  NotFoundError,
-  ConflictError,
+  UserNotFoundError,
   UnauthorizedError,
-  AccountNotVerifiedError,
-  InvalidOtpError,
+  ForbiddenError,
+  ConflictError,
   ValidationError,
+  ServiceUnavailableError,
 };
