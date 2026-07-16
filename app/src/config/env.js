@@ -1,32 +1,36 @@
-```javascript
 'use strict';
 
-const { z } = require('zod');
+/**
+ * Centralised, validated environment configuration.
+ * All process.env access must go through this module.
+ */
 
-const envSchema = z.object({
-  smtpHost: z.string(),
-  smtpPort: z.number(),
-  smtpSecure: z.boolean(),
-  smtpUser: z.string(),
-  smtpPass: z.string(),
-  emailFrom: z.string(),
-});
+const config = {
+  nodeEnv: process.env.NODE_ENV || 'development',
+  port: parseInt(process.env.PORT, 10) || 3000,
 
-const env = {
-  smtpHost: process.env.SMTP_HOST,
-  smtpPort: parseInt(process.env.SMTP_PORT, 10),
-  smtpSecure: process.env.SMTP_SECURE === 'true',
-  smtpUser: process.env.SMTP_USER,
-  smtpPass: process.env.SMTP_PASS,
-  emailFrom: process.env.EMAIL_FROM,
+  db: {
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT, 10) || 5432,
+    name: process.env.DB_NAME || 'user_management',
+    user: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD || '',
+    poolMax: parseInt(process.env.DB_POOL_MAX, 10) || 10,
+    idleTimeoutMs: parseInt(process.env.DB_POOL_IDLE_TIMEOUT_MS, 10) || 30000,
+    connectionTimeoutMs: parseInt(process.env.DB_POOL_CONNECTION_TIMEOUT_MS, 10) || 2000,
+  },
+
+  jwt: {
+    secret: process.env.JWT_SECRET || 'change_me_in_production',
+    expiresIn: process.env.JWT_EXPIRES_IN || '1h',
+  },
+
+  otp: {
+    expiryMinutes: parseInt(process.env.OTP_EXPIRY_MINUTES, 10) || 10,
+    length: parseInt(process.env.OTP_LENGTH, 10) || 6,
+  },
+
+  logLevel: process.env.LOG_LEVEL || 'info',
 };
 
-const _env = envSchema.safeParse(env);
-
-if (!_env.success) {
-  console.error('Invalid environment variables', _env.error.format());
-  process.exit(1);
-}
-
-module.exports = _env.data;
-```
+module.exports = config;

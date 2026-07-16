@@ -2,31 +2,22 @@
 
 const { createLogger, format, transports } = require('winston');
 
-const { combine, timestamp, printf, colorize, errors } = format;
-
-const logFormat = printf(({ level, message, timestamp: ts, stack }) => {
-  return stack
-    ? `${ts} [${level}]: ${message}\n${stack}`
-    : `${ts} [${level}]: ${message}`;
-});
-
+/**
+ * Shared Winston logger instance for structured logging.
+ * Log level is controlled via the LOG_LEVEL environment variable.
+ */
 const logger = createLogger({
   level: process.env.LOG_LEVEL || 'info',
-  format: combine(
-    timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-    errors({ stack: true }),
-    logFormat
+  format: format.combine(
+    format.timestamp({ format: 'YYYY-MM-DDTHH:mm:ss.SSSZ' }),
+    format.errors({ stack: true }),
+    format.json()
   ),
   transports: [
     new transports.Console({
-      format: combine(colorize(), logFormat),
+      silent: process.env.NODE_ENV === 'test',
     }),
   ],
 });
-
-// Silence logs during testing
-if (process.env.NODE_ENV === 'test') {
-  logger.silent = true;
-}
 
 module.exports = logger;
