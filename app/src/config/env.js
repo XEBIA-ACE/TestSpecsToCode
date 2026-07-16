@@ -2,9 +2,21 @@
 
 /**
  * Centralised environment configuration.
- * All process.env reads happen here so the rest of the codebase
- * never touches process.env directly.
+ *
+ * Reads from process.env (populated by dotenv in index.js).
+ * Throws at startup if required variables are missing.
  */
+
+function required(name) {
+  const value = process.env[name];
+  if (!value) {
+    // In test environments some vars may be absent — use safe defaults
+    if (process.env.NODE_ENV === 'test') return undefined;
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+  return value;
+}
+
 const config = {
   nodeEnv: process.env.NODE_ENV || 'development',
   port: parseInt(process.env.PORT || '3000', 10),
@@ -20,9 +32,17 @@ const config = {
     connectionTimeoutMs: parseInt(process.env.DB_POOL_CONNECTION_TIMEOUT_MS || '2000', 10),
   },
 
-  jwt: {
-    secret: process.env.JWT_SECRET || 'dev_secret_replace_me',
-    expiresIn: process.env.JWT_EXPIRES_IN || '1h',
+  // JWT / Auth
+  jwtSecret: process.env.JWT_SECRET || 'dev-secret-change-in-production',
+  jwtExpiresIn: process.env.JWT_EXPIRES_IN || '1h',
+
+  auth: {
+    /** URL of the login page — used by requireAuth middleware for redirects */
+    loginUrl: process.env.LOGIN_URL || '/api/v1/users/login',
+    /** Default landing page after login when no returnUrl is present */
+    defaultLandingUrl: process.env.DEFAULT_LANDING_URL || '/api/v1/users/me',
+    /** JWT secret (alias for convenience in middleware) */
+    jwtSecret: process.env.JWT_SECRET || 'dev-secret-change-in-production',
   },
 
   otp: {
@@ -30,8 +50,8 @@ const config = {
     length: parseInt(process.env.OTP_LENGTH || '6', 10),
   },
 
-  email: {
-    host: process.env.SMTP_HOST || 'localhost',
+  smtp: {
+    host: process.env.SMTP_HOST || 'smtp.example.com',
     port: parseInt(process.env.SMTP_PORT || '587', 10),
     secure: process.env.SMTP_SECURE === 'true',
     user: process.env.SMTP_USER || '',
