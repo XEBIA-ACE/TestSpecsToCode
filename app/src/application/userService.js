@@ -1,33 +1,66 @@
-```javascript
 'use strict';
 
-const bcrypt = require('bcrypt');
-const NodemailerEmailService = require('../adapters/outbound/email/nodemailerEmailService');
-const { generateOtp } = require('../utils/generateOtp');
+const User = require('../domain/entities/user');
+const { UserNotFoundError, ServiceUnavailableError } = require('../domain/errors/domainErrors');
+const logger = require('../infrastructure/logger');
 
+/**
+ * UserService — application-layer use-case orchestration.
+ *
+ * Depends on a userRepository that implements the outbound repository port.
+ * The repository is injected at construction time to keep this class testable.
+ */
 class UserService {
-  async registerUser(userDetails) {
-    const { email, password, name } = userDetails;
+  /**
+   * @param {{ findById: (id: string) => Promise<object|null> }} userRepository
+   */
+  constructor(userRepository) {
+    this.userRepository = userRepository;
+  }
 
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
+  /**
+   * Retrieve account information for the given user ID.
+   *
+   * Returns the data shape required by the GET /me/account endpoint:
+   *   { name, email, registrationDate, accountStatus }
+   *
+   * @param {string} userId - UUID of the authenticated user
+   * @returns {Promise<{ name: string, email: string, registrationDate: string, accountStatus: string }>}
+   * @throws {UserNotFoundError}   when no user exists for the given ID
+   * @throws {ServiceUnavailableError} when the database is unreachable
+   */
+  async getAccountInfo(userId) {
+    let rawUser;
 
-    // Assuming user creation logic is handled here
-    // Add user to database
-    // const user = await userRepository.createUser({ email, hashedPassword, name });
+    try {
+      rawUser = await this.userRepository.findById(userId);
+    } catch (err) {
+      logger.error('UserService.getAccountInfo — repository error', {
+        userId,
+        error: err.message,
+        stack: err.stack,
+      });
+      throw new ServiceUnavailableError('Unable to retrieve account information at this time');
+    }
 
-    // Generate OTP
-    const otp = generateOtp();
+    if (!rawUser) {
+      throw new UserNotFoundError(`User with id ${userId} not found`);
+    }
 
-    // Send OTP email
-    await NodemailerEmailService.sendOtpEmail(email, otp);
+    // Map raw DB row → domain entity → response DTO
+    const user = new User({
+      id: rawUser.id,
+      firstName: rawUser.first_name ?? rawUser.firstName ?? '',
+      lastName: rawUser.last_name ?? rawUser.lastName ?? '',
+      email: rawUser.email,
+      isVerified: rawUser.is_verified ?? rawUser.isVerified ?? false,
+      isDeleted: rawUser.is_deleted ?? rawUser.isDeleted ?? false,
+      createdAt: rawUser.created_at ?? rawUser.createdAt,
+      updatedAt: rawUser.updated_at ?? rawUser.updatedAt,
+    });
 
-    // Assuming OTP storage logic is handled here
-    // await otpRepository.storeOtp(user.id, otp);
-
-    return { message: 'User registered. Please check your email for the OTP' };
+    return user.toAccountInfo();
   }
 }
 
-module.exports = new UserService();
-```
+module.exports = UserService;

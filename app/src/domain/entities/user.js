@@ -1,66 +1,64 @@
 'use strict';
 
-const { v4: uuidv4 } = require('uuid');
-
 /**
- * User entity — pure domain object, no framework dependencies.
- *
- * @typedef {Object} UserProps
- * @property {string}  [id]         - UUID (generated if omitted)
- * @property {string}  name         - Full name
- * @property {string}  email        - Email address (lowercased)
- * @property {string}  passwordHash - bcrypt hash of the password
- * @property {boolean} [isVerified] - Whether the email has been verified
- * @property {boolean} [isDeleted]  - Soft-delete flag
- * @property {Date}    [createdAt]  - Creation timestamp
- * @property {Date}    [updatedAt]  - Last-update timestamp
+ * User domain entity.
+ * Encapsulates user data and provides derived properties.
  */
-
 class User {
   /**
-   * @param {UserProps} props
+   * @param {object} params
+   * @param {string} params.id - UUID primary key
+   * @param {string} params.firstName
+   * @param {string} params.lastName
+   * @param {string} params.email
+   * @param {boolean} params.isVerified
+   * @param {boolean} [params.isDeleted]
+   * @param {Date|string} params.createdAt
+   * @param {Date|string} [params.updatedAt]
    */
-  constructor({ id, name, email, passwordHash, isVerified = false, isDeleted = false, createdAt, updatedAt } = {}) {
-    this.id = id || uuidv4();
-    this.name = name;
-    this.email = email ? email.toLowerCase().trim() : email;
-    this.passwordHash = passwordHash;
+  constructor({ id, firstName, lastName, email, isVerified, isDeleted = false, createdAt, updatedAt }) {
+    this.id = id;
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.email = email;
     this.isVerified = isVerified;
     this.isDeleted = isDeleted;
-    this.createdAt = createdAt || new Date();
-    this.updatedAt = updatedAt || new Date();
+    this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
+  }
+
+  /** Full display name. */
+  get name() {
+    return `${this.firstName} ${this.lastName}`.trim();
   }
 
   /**
-   * Returns a safe public representation (no password hash).
-   * @returns {Object}
+   * Human-readable account status derived from isVerified flag.
+   * @returns {'Verified'|'Pending Verification'}
    */
-  toPublic() {
+  get accountStatus() {
+    return this.isVerified ? 'Verified' : 'Pending Verification';
+  }
+
+  /**
+   * Registration date in ISO 8601 format.
+   * @returns {string}
+   */
+  get registrationDate() {
+    return new Date(this.createdAt).toISOString();
+  }
+
+  /**
+   * Serialise to the account-info response shape.
+   * @returns {{ name: string, email: string, registrationDate: string, accountStatus: string }}
+   */
+  toAccountInfo() {
     return {
-      id: this.id,
       name: this.name,
       email: this.email,
-      isVerified: this.isVerified,
-      createdAt: this.createdAt,
+      registrationDate: this.registrationDate,
+      accountStatus: this.accountStatus,
     };
-  }
-
-  /**
-   * Reconstruct a User from a database row.
-   * @param {Object} row
-   * @returns {User}
-   */
-  static fromRow(row) {
-    return new User({
-      id: row.id,
-      name: row.name,
-      email: row.email,
-      passwordHash: row.password_hash,
-      isVerified: row.is_verified,
-      isDeleted: row.is_deleted,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-    });
   }
 }
 

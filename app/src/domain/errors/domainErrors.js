@@ -1,63 +1,71 @@
 'use strict';
 
 /**
- * Domain-specific error types.
- * These are thrown by the application layer and caught by the HTTP adapter
- * to produce appropriate HTTP responses.
+ * Domain-specific error classes for the User Management Service.
+ * All errors extend the base DomainError to allow consistent handling.
  */
 
 class DomainError extends Error {
-  constructor(message, statusCode = 400) {
+  /**
+   * @param {string} message - Human-readable error message
+   * @param {number} statusCode - HTTP status code to return
+   */
+  constructor(message, statusCode = 500) {
     super(message);
     this.name = this.constructor.name;
     this.statusCode = statusCode;
-    // Maintains proper stack trace in V8
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, this.constructor);
-    }
+    Error.captureStackTrace(this, this.constructor);
   }
 }
 
-/** Thrown when a resource already exists (e.g. duplicate email). */
+/** Thrown when a requested user cannot be found. */
+class UserNotFoundError extends DomainError {
+  constructor(message = 'User not found') {
+    super(message, 404);
+  }
+}
+
+/** Thrown when authentication credentials are invalid or missing. */
+class UnauthorizedError extends DomainError {
+  constructor(message = 'Unauthorized') {
+    super(message, 401);
+  }
+}
+
+/** Thrown when a user attempts an action they are not permitted to perform. */
+class ForbiddenError extends DomainError {
+  constructor(message = 'Forbidden') {
+    super(message, 403);
+  }
+}
+
+/** Thrown when a duplicate resource (e.g. email) already exists. */
 class ConflictError extends DomainError {
-  constructor(message = 'Resource already exists') {
+  constructor(message = 'Conflict') {
     super(message, 409);
   }
 }
 
-/** Thrown when input validation fails at the domain level. */
+/** Thrown when input validation fails at the domain layer. */
 class ValidationError extends DomainError {
   constructor(message = 'Validation failed') {
     super(message, 422);
   }
 }
 
-/** Thrown when a requested resource cannot be found. */
-class NotFoundError extends DomainError {
-  constructor(message = 'Resource not found') {
-    super(message, 404);
-  }
-}
-
-/** Thrown when authentication fails. */
-class AuthenticationError extends DomainError {
-  constructor(message = 'Authentication failed') {
-    super(message, 401);
-  }
-}
-
-/** Thrown when the caller lacks permission. */
-class AuthorizationError extends DomainError {
-  constructor(message = 'Forbidden') {
-    super(message, 403);
+/** Thrown when the database or an external service is unavailable. */
+class ServiceUnavailableError extends DomainError {
+  constructor(message = 'Service unavailable') {
+    super(message, 503);
   }
 }
 
 module.exports = {
   DomainError,
+  UserNotFoundError,
+  UnauthorizedError,
+  ForbiddenError,
   ConflictError,
   ValidationError,
-  NotFoundError,
-  AuthenticationError,
-  AuthorizationError,
+  ServiceUnavailableError,
 };
