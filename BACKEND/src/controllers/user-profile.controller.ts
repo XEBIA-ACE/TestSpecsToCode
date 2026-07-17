@@ -12,15 +12,22 @@
 import { Request, Response } from 'express';
 import { UserProfileService } from '../services/user-profile.service';
 import { UserNotFoundException } from '../errors/registration.errors';
+import { AuditLogService } from '../services/audit-log.service';
 
 export class UserProfileController {
-  constructor(private readonly userProfileService: UserProfileService) {}
+  constructor(
+    private readonly userProfileService: UserProfileService,
+    private readonly auditLogService: AuditLogService,
+  ) {}
 
   async getMe(req: Request, res: Response): Promise<void> {
     const userId = req.userId as string;
 
     try {
       const profile = await this.userProfileService.getProfile(userId);
+      this.auditLogService.logAccess(userId, 'ACCOUNT_INFO_VIEW', req.ip ?? 'unknown');
+      res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+      res.set('Pragma', 'no-cache');
       res.status(200).json({
         username: profile.username,
         email: profile.email,

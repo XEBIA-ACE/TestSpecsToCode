@@ -1,6 +1,3 @@
-# UserManagementSystem
-User Management System
-
 # Running the User Management Service Locally
 
 The repo is split into two independently run apps:
@@ -93,7 +90,7 @@ curl http://localhost:3000/health
 # {"status":"ok","db_reachable":true}
 ```
 
-See `DOCS/API_REFERENCE.md` for the full endpoint list, and `DOCS/postman/UMS.postman_collection.json` / `BACKEND/tests/api.http` for ready-to-run requests. `GET /api-docs` serves the same contract interactively via Swagger UI, generated from `DOCS/openapi.yaml`.
+See `DOCS/API_REFERENCE.md` for the full endpoint list, and `DOCS/postman/UMS.postman_collection.json` / `BACKEND/tests/api.http` for ready-to-run requests.
 
 ## Running tests
 
@@ -104,18 +101,6 @@ npm run test:integration   # requires a reachable Redis (see .env); each spec ge
 ```
 
 **Note on integration tests**: each spec file (`src/integration/*.spec.ts`) now gets its own isolated SQLite database file (via `src/integration/test-db.ts`), so there's no shared-table truncation race between files.
-
-## Observations — integrating US-001 ("View Account Information") with the existing UMS app
-
-While bringing the existing 4 UMS features (Registration, OTP verification, Login, Delete account) and the new US-001 requirement together into one running project, the following was found and resolved:
-
-| # | Observation | Resolution | Affected file(s) |
-|---|---|---|---|
-| 1 | US-001 had been implemented as a brand-new, standalone `app/` microservice (plain JS, PostgreSQL, JWT bearer auth) with no integration into `BACKEND`/`FRONTEND` at all — a second backend stack, not an added feature | Confirmed `BACKEND`'s existing `GET /api/v1/users/me` (session-token auth, `better-sqlite3`) already returns the profile data US-001 needs and is already consumed by `FRONTEND`'s `AccountDashboardTemplate`; ported only the genuinely new behavior (audit logging, no-cache headers) into that endpoint instead of standing up a duplicate route | `BACKEND/src/services/audit-log.service.ts` (new), `BACKEND/src/controllers/user-profile.controller.ts`, `BACKEND/src/routes/user-profile.routes.ts` |
-| 2 | `app/package.json` used the same package name (`user-management-service`) as `BACKEND/package.json`, and its `users`/`otps` Postgres schema duplicated (with different column conventions) `BACKEND`'s SQLite schema | Removed the `app/` folder entirely now that its one real feature is ported | `app/` (deleted) |
-| 3 | `BACKEND/src/app.ts` referenced `DOCS/openapi.yaml` for Swagger UI, but no `DOCS/` folder existed at the repo root — would crash the server on startup via `YAML.load` on a missing file. The real `DOCS/` (openapi spec + reference docs) turned out to exist in a separate `LegacyProject/` folder that hadn't been merged in yet | Added an `fs.existsSync` guard around the Swagger mount as a safety net, then moved `LegacyProject/DOCS/` to the repo root so `/api-docs` resolves for real; removed the now-empty `LegacyProject/` folder | `BACKEND/src/app.ts`, `DOCS/` (moved from `LegacyProject/DOCS/`) |
-| 4 | Stray, non-functional files at the repo root / in `BACKEND`: an empty root `package-lock.json` with no corresponding root `package.json`; `BACKEND/test.ts` (a manual, hardcoded SendGrid smoke-test script); `BACKEND/test-output.txt` / `BACKEND/unit-test-output.txt` (stale captured test-run logs) | Removed all four — none were referenced by any build/test script | `package-lock.json`, `BACKEND/test.ts`, `BACKEND/test-output.txt`, `BACKEND/unit-test-output.txt` |
-| 5 | `specs/us-001/spec.md` and `specs/us-001/tasks.md` documented the original `app/`-based design (`GET /api/v1/users/me/account`, JWT) as the API contract, which no longer matches what's shipped | Added an implementation note at the top of both files pointing to the actual shipped endpoint and files, keeping the original design as historical record | `specs/us-001/spec.md`, `specs/us-001/tasks.md` |
 
 ## Fixes applied during verification (Phase 6)
 

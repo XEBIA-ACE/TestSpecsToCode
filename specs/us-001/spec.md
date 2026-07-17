@@ -1,5 +1,16 @@
 # Functional Specification — US-001: View Account Information from Dashboard
 
+> **Implementation note (2026-07-17)**: this requirement is satisfied by extending
+> `BACKEND`'s existing `GET /api/v1/users/me` endpoint (session-token auth,
+> `better-sqlite3`) rather than the separate `GET /api/v1/users/me/account`
+> (JWT + PostgreSQL) endpoint originally prototyped in the standalone `app/`
+> service below. `BACKEND`'s response already carries the same profile fields
+> the FRONTEND dashboard consumes; audit logging (`ACCOUNT_INFO_VIEW`) and
+> no-cache headers were added to that endpoint instead of standing up a
+> second, near-duplicate route. The `app/` service and the API contract/task
+> list below are kept as the original design record but are not the shipped
+> implementation.
+
 ## User Story Narrative
 
 **As an** authenticated user  

@@ -2,25 +2,29 @@ import { Request, Response } from 'express';
 import { UserProfileController } from './user-profile.controller';
 import { UserProfileService } from '../services/user-profile.service';
 import { UserNotFoundException } from '../errors/registration.errors';
+import { AuditLogService } from '../services/audit-log.service';
 
-function buildRequest(userId: string): Request {
-  return { userId } as unknown as Request;
+function buildRequest(userId: string, ip = '127.0.0.1'): Request {
+  return { userId, ip } as unknown as Request;
 }
 
 function buildResponse(): Response {
   const res = {} as Response;
   res.status = jest.fn().mockReturnValue(res);
   res.json = jest.fn().mockReturnValue(res);
+  res.set = jest.fn().mockReturnValue(res);
   return res;
 }
 
 describe('UserProfileController', () => {
   let userProfileService: jest.Mocked<UserProfileService>;
+  let auditLogService: jest.Mocked<AuditLogService>;
   let controller: UserProfileController;
 
   beforeEach(() => {
     userProfileService = { getProfile: jest.fn() };
-    controller = new UserProfileController(userProfileService);
+    auditLogService = { logAccess: jest.fn() };
+    controller = new UserProfileController(userProfileService, auditLogService);
   });
 
   test('happy path -> 200 with the profile, dates serialized to ISO strings', async () => {
@@ -47,6 +51,9 @@ describe('UserProfileController', () => {
       lastLoginAt: '2026-01-02T00:00:00.000Z',
       activeSessions: 2,
     });
+    expect(auditLogService.logAccess).toHaveBeenCalledWith('user-1', 'ACCOUNT_INFO_VIEW', '127.0.0.1');
+    expect(res.set).toHaveBeenCalledWith('Cache-Control', 'no-store, no-cache, must-revalidate');
+    expect(res.set).toHaveBeenCalledWith('Pragma', 'no-cache');
   });
 
   test('lastLoginAt null -> serialized as null, not a crash', async () => {
@@ -90,6 +97,7 @@ describe('UserProfileController', () => {
     await controller.getMe(req, res);
 
     expect(res.status).toHaveBeenCalledWith(500);
+    expect(auditLogService.logAccess).not.toHaveBeenCalled();
     consoleErrorSpy.mockRestore();
   });
 });

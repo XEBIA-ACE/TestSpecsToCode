@@ -1,5 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
+import fs from 'fs';
 import path from 'path';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
@@ -210,9 +211,15 @@ export function createApp(
 
   // Swagger UI — serves DOCS/openapi.yaml, generated from the routes/controllers
   // themselves (see DOCS/PROJECT_ANALYSIS.md Phase 9). Unauthenticated, matching
-  // the other introspection endpoint (/health).
-  const openApiDocument = YAML.load(path.join(__dirname, '..', '..', 'DOCS', 'openapi.yaml'));
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
+  // the other introspection endpoint (/health). Optional: if the spec hasn't
+  // been generated yet, skip mounting docs rather than failing server startup.
+  const openApiPath = path.join(__dirname, '..', '..', 'DOCS', 'openapi.yaml');
+  if (fs.existsSync(openApiPath)) {
+    const openApiDocument = YAML.load(openApiPath);
+    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
+  } else {
+    console.warn(`[App] OpenAPI spec not found at ${openApiPath} — /api-docs will not be available.`);
+  }
 
   app.use((_req: Request, res: Response) => {
     res.status(404).json({ error: 'Not found.' });

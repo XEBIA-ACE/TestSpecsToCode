@@ -20,12 +20,14 @@ import { DefaultUserProfileService } from '../services/user-profile.service';
 import { UserProfileController } from '../controllers/user-profile.controller';
 import { SessionService } from '../services/session.service';
 import { createSessionValidationMiddleware } from '../middleware/session-validation.middleware';
+import { ConsoleAuditLogService } from '../services/audit-log.service';
 
 export function createUserProfileRouter(db: Database, sessionService: SessionService): Router {
   const router = Router();
 
   const controller = new UserProfileController(
     new DefaultUserProfileService(new UserRepository(db), new SessionRepository(db)),
+    new ConsoleAuditLogService(),
   );
 
   const requireSession = createSessionValidationMiddleware(sessionService);

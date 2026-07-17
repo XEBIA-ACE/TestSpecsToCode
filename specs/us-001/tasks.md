@@ -1,5 +1,14 @@
 # Implementation Tasks — US-001: View Account Information from Dashboard
 
+> **Implementation note (2026-07-17)**: the tasks below describe the original
+> standalone `app/` prototype (JWT + PostgreSQL). The shipped implementation
+> instead extends `BACKEND/src/controllers/user-profile.controller.ts` /
+> `BACKEND/src/routes/user-profile.routes.ts` (existing session-auth `GET
+> /api/v1/users/me` endpoint) with a new `BACKEND/src/services/audit-log.service.ts`
+> for `ACCOUNT_INFO_VIEW` logging and no-cache response headers. The `app/`
+> folder has been removed from the repo. Kept below as the original design
+> record.
+
 ## Repository: XEBIA-ACE/TestSpecsToCode.git
 
 ### Authentication Middleware
