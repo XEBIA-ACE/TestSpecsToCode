@@ -1,54 +1,41 @@
 'use strict';
 
-const { createUser, toPublicUser } = require('../../src/domain/entities/user');
+const User = require('../src/domain/entities/user');
 
-describe('createUser', () => {
-  it('creates a user with correct defaults', () => {
-    const user = createUser({
-      email: '  Alice@Example.COM  ',
-      passwordHash: 'hashed',
-      firstName: '  Alice  ',
-      lastName: 'Smith',
-    });
-
-    expect(user.email).toBe('alice@example.com');
-    expect(user.firstName).toBe('Alice');
-    expect(user.isVerified).toBe(false);
-    expect(user.otpCode).toBeNull();
-    expect(user.otpExpiresAt).toBeNull();
+describe('User entity', () => {
+  it('creates a user with default values', () => {
+    const user = new User({ name: 'Alice', email: 'Alice@Example.com', passwordHash: 'hash' });
     expect(user.id).toBeDefined();
+    expect(user.name).toBe('Alice');
+    // email is normalised to lowercase
+    expect(user.email).toBe('alice@example.com');
+    expect(user.isVerified).toBe(false);
+    expect(user.isDeleted).toBe(false);
     expect(user.createdAt).toBeInstanceOf(Date);
-    expect(user.updatedAt).toBeInstanceOf(Date);
   });
 
-  it('uses provided id when supplied', () => {
-    const user = createUser({
-      id: 'custom-id',
-      email: 'bob@example.com',
-      passwordHash: 'hash',
-      firstName: 'Bob',
-      lastName: 'Jones',
-    });
-    expect(user.id).toBe('custom-id');
+  it('toPublic() omits passwordHash', () => {
+    const user = new User({ name: 'Bob', email: 'bob@example.com', passwordHash: 'secret' });
+    const pub = user.toPublic();
+    expect(pub.passwordHash).toBeUndefined();
+    expect(pub.id).toBeDefined();
+    expect(pub.email).toBe('bob@example.com');
   });
-});
 
-describe('toPublicUser', () => {
-  it('omits passwordHash and OTP fields', () => {
-    const user = createUser({
+  it('fromRow() maps snake_case DB columns', () => {
+    const row = {
+      id: 'abc-123',
+      name: 'Carol',
       email: 'carol@example.com',
-      passwordHash: 'secret',
-      firstName: 'Carol',
-      lastName: 'White',
-    });
-    user.otpCode = 'otp-hash';
-    user.otpExpiresAt = new Date();
-
-    const pub = toPublicUser(user);
-    expect(pub).not.toHaveProperty('passwordHash');
-    expect(pub).not.toHaveProperty('otpCode');
-    expect(pub).not.toHaveProperty('otpExpiresAt');
-    expect(pub).toHaveProperty('email', 'carol@example.com');
-    expect(pub).toHaveProperty('isVerified', false);
+      password_hash: 'hashed',
+      is_verified: true,
+      is_deleted: false,
+      created_at: new Date('2024-01-01'),
+      updated_at: new Date('2024-01-02'),
+    };
+    const user = User.fromRow(row);
+    expect(user.id).toBe('abc-123');
+    expect(user.isVerified).toBe(true);
+    expect(user.passwordHash).toBe('hashed');
   });
 });

@@ -1,10 +1,13 @@
 'use strict';
 
 const { Pool } = require('pg');
-const config = require('../../../config/env');
-const logger = require('../../logger');
+const config = require('../../config/env');
+const logger = require('../logger');
 
-/** Singleton pg Pool shared across the process. */
+/**
+ * Singleton pg connection pool.
+ * Shared across all repository adapters.
+ */
 const pool = new Pool({
   host: config.db.host,
   port: config.db.port,
@@ -17,7 +20,7 @@ const pool = new Pool({
 });
 
 pool.on('error', (err) => {
-  logger.error('Unexpected pg pool error', { message: err.message });
+  logger.error('Unexpected pg pool error', { error: err.message, stack: err.stack });
 });
 
 module.exports = pool;

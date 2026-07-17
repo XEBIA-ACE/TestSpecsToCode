@@ -1,82 +1,67 @@
 'use strict';
 
 const { Router } = require('express');
-const UserService = require('../../../application/userService');
-const PostgresUserRepository = require('../../outbound/db/postgresUserRepository');
-const NodemailerEmailService = require('../../outbound/email/nodemailerEmailService');
-const {
-  validate,
-  registerRules,
-  loginRules,
-  verifyOtpRules,
-  resendOtpRules,
-  userIdRules,
-} = require('./validators');
 
-// ── Dependency wiring (composition root) ──────────────────────────────────
-const userRepository = new PostgresUserRepository();
-const emailService = new NodemailerEmailService();
-const userService = new UserService({ userRepository, emailService });
+const authMiddleware = require('./authMiddleware');
+const UserService = require('../../../application/userService');
+const PostgresUserRepository = require('../../outbound/db/userRepository');
+const auditLogService = require('../../../infrastructure/auditLogService');
+const logger = require('../../../infrastructure/logger');
 
 const router = Router();
 
-// ── POST /api/v1/users/register ────────────────────────────────────────────
-router.post('/register', registerRules, validate, async (req, res, next) => {
-  try {
-    const user = await userService.register(req.body);
-    res.status(201).json({ data: user });
-  } catch (err) {
-    next(err);
-  }
-});
+// ── Dependency wiring ──────────────────────────────────────────────────────
+// Repositories and services are instantiated here (composition root for this
+// router). In a larger app these would be injected via a DI container.
+const userRepository = new PostgresUserRepository();
+const userService = new UserService(userRepository);
 
-// ── POST /api/v1/users/login ───────────────────────────────────────────────
-router.post('/login', loginRules, validate, async (req, res, next) => {
+// ── GET /me/account ────────────────────────────────────────────────────────
+/**
+ * Retrieve account information for the currently authenticated user.
+ *
+ * Security:
+ *  - authMiddleware validates the Bearer JWT and attaches req.user
+ *  - Cache-Control / Pragma headers prevent browser/proxy caching of PII
+ *
+ * Audit:
+ *  - auditLogService.logAccess() is called fire-and-forget (non-blocking)
+ *    so it never adds latency to the response
+ *
+ * Response shape:
+ *  {
+ *    "data": {
+ *      "name": string,
+ *      "email": string,
+ *      "registrationDate": string,   // ISO 8601
+ *      "accountStatus": string       // "Verified" | "Pending Verification"
+ *    }
+ *  }
+ */
+router.get('/me/account', authMiddleware, async (req, res, next) => {
   try {
-    const result = await userService.login(req.body);
-    res.status(200).json({ data: result });
-  } catch (err) {
-    next(err);
-  }
-});
+    const userId = req.user.id;
 
-// ── POST /api/v1/users/verify-otp ─────────────────────────────────────────
-router.post('/verify-otp', verifyOtpRules, validate, async (req, res, next) => {
-  try {
-    const user = await userService.verifyOtp(req.body);
-    res.status(200).json({ data: user });
-  } catch (err) {
-    next(err);
-  }
-});
+    // Retrieve account information from the application layer
+    const accountInfo = await userService.getAccountInfo(userId);
 
-// ── POST /api/v1/users/resend-otp ─────────────────────────────────────────
-router.post('/resend-otp', resendOtpRules, validate, async (req, res, next) => {
-  try {
-    await userService.resendOtp(req.body);
-    res.status(200).json({ message: 'OTP sent successfully' });
-  } catch (err) {
-    next(err);
-  }
-});
+    // Fire-and-forget audit log — must NOT be awaited
+    // Per constitution.md: "Audit logging must be non-blocking"
+    auditLogService.logAccess(
+      userId,
+      'ACCOUNT_INFO_VIEW',
+      req.ip || req.socket?.remoteAddress
+    );
 
-// ── GET /api/v1/users/:id ──────────────────────────────────────────────────
-router.get('/:id', userIdRules, validate, async (req, res, next) => {
-  try {
-    const user = await userService.getUserById(req.params.id);
-    res.status(200).json({ data: user });
-  } catch (err) {
-    next(err);
-  }
-});
+    // Prevent caching of sensitive account data
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+    res.set('Pragma', 'no-cache');
 
-// ── DELETE /api/v1/users/:id ───────────────────────────────────────────────
-router.delete('/:id', userIdRules, validate, async (req, res, next) => {
-  try {
-    await userService.deleteUser(req.params.id);
-    res.status(204).send();
+    // Respond with data wrapper as per API contract
+    return res.status(200).json({ data: accountInfo });
   } catch (err) {
-    next(err);
+    logger.error('GET /me/account failed', { error: err.message, stack: err.stack });
+    return next(err);
   }
 });
 

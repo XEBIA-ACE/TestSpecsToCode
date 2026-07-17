@@ -1,99 +1,100 @@
-## S-001
+# User Registration Process Documentation
 
-### Contracts & Interfaces
+## Overview
 
-#### API Contracts
+This document provides detailed information on the user registration process for the User Management Service, including API usage, dependencies, and functionality critical to the feature.
 
-1. **POST /api/v1/users/register**
-   - **Request Body**:
-     - `name`: string, required
-     - `email`: string, required
-     - `password`: string, required
-   - **Response**:
-     - 201 Created: User successfully registered, OTP sent
-     - 400 Bad Request: Validation errors, e.g., "invalid email format", "duplicate email"
-     - 500 Internal Server Error: Unhandled server exceptions
+## Feature Description
 
-2. **POST /api/v1/users/otp/resend**
-   - [NEEDS CLARIFICATION: Payload and response for OTP resend]
-   - 200 OK: OTP resent successfully
-   - 404 Not Found: User not found or already verified
-   - 500 Internal Server Error: Unhandled server exceptions
+The User Registration feature allows new users to create an account in the system. The process ensures that:
+- User passwords are securely hashed.
+- Emails must be unique and verified through a One-Time Password (OTP) mechanism before account activation.
+- Appropriate error messages are shown for invalid or duplicate email attempts.
 
-### Test Strategy
+## API Endpoints
 
-#### Test Cases for Contracts
+### POST /api/v1/users/register
 
-1. **POST /api/v1/users/register**
-   - Verify response status 201 when valid inputs are provided.
-   - Validate response status 400 when email is in an invalid format. (FR-002)
-   - Validate response status 400 when email already exists. (FR-003)
-   - Ensure response contains appropriate error messages for missing fields. (FR-009)
+**Description:** Initiates the user registration process. After receiving user information such as name, email, and password, it creates a new user account and sends an OTP to the provided email for verification.
 
-2. **Email Uniqueness and Validation**
-   - Attempt registering with existing email and expect a "duplicate email" response. (FR-010)
+#### Request
+- **Method:** POST
+- **Path:** `/api/v1/users/register`
+- **Headers:**
+  - `Content-Type: application/json`
+- **Body:**
+  ```json
+  {
+    "name": "John Doe",
+    "email": "johndoe@example.com",
+    "password": "securePassword123"
+  }
+  ```
 
-3. **OTP Transmission**
-   - Confirm that an OTP email is sent after successful registration. (FR-007)
+#### Response
 
-### Implementation Approach
+- **Success (201 Created):**
+  ```json
+  {
+    "message": "Registration successful. Please verify your email to complete the process."
+  }
+  ```
+- **Error (400 Bad Request):**
+  ```json
+  {
+    "error": "Email is already in use."
+  }
+  ```
+- **Error (422 Unprocessable Entity):**
+  ```json
+  {
+    "error": "Invalid request data. Please ensure all fields are correctly filled."
+  }
+  ```
 
-#### Data Model Changes
+## Dependencies
 
-1. **User Table**
-   - Add `isVerified` column: BOOLEAN, default `false`.
-   - Ensure uniqueness of `email` column with an index.
-   
-2. **OTP Table**
-   - `id`: UUID, primary key
-   - `user_id`: Foreign key referencing User
-   - `code`: VARCHAR
-   - `expiration_time`: DATETIME
+### bcrypt
 
-#### Core Implementation Logic
+- **Role:** Hashes user passwords using the library to ensure passwords are stored securely and not in plaintext.
+- **Integration:** Utilized within the registration handler to hash passwords before saving them in the database.
 
-1. **RegistrationService**
-   - `registerUser(name, email, password)`:
-     - Validate email format via regex.
-     - Check `email` uniqueness by querying `User` table.
-     - Hash `password` using bcrypt before storage. (FR-004, FR-005)
-     - Create the user entry with `isVerified = false`.
-     - Generate OTP using `generateOtp()` method.
+### nodemailer
 
-2. **OtpService**
-   - `generateOtp(userId)`:
-     - Generate a secure OTP code.
-     - Set expiration time for OTP.
-     - Save to OTP Table associated with the `user_id`.
+- **Role:** Responsible for sending OTPs via email as part of the email verification process.
+- **Integration:** Configured to dispatch an OTP email to the user after successful registration request acceptance.
 
-#### Inter-Service Calls
+### PostgreSQL
 
-1. **EmailService**
-   - Invoke `sendEmail(to, subject, body)` via an external or internal service for sending the OTP. (Assumed: Email service available)
+- **Role:** Backend database that stores user information, including hashed passwords and verification status.
+- **Integration:** In conjunction with the user registration feature, PostgreSQL ensures user data is stored securely and efficiently.
 
-#### Async Patterns
+## Functionality
 
-Use asynchronous task queue (e.g., RabbitMQ) to handle sending email after user creation, ensuring non-blocking registration completion.
+### Password Hashing
+User passwords are hashed using bcrypt before storage to prevent exposure in plaintext.
 
-### Architectural Decision Records (ADRs)
+### Email Verification
+After registration with a valid email:
+- An OTP is generated and sent via email.
+- The user must verify the OTP to activate their account.
 
-1. **ADR-001: Email Format Validation**
-   - **Context**: Need to validate user emails.
-   - **Decision**: Use regex for initial validation.
-   - **Rationale**: Simplicity and speed.
-   - **Alternatives**: Third-party API validation; rejected due to complexity.
+### Error Handling
+- Duplicate emails trigger a prompt to use a different address.
+- Input validations ensure all required fields are present and correctly formatted.
 
-2. **ADR-002: Password Hashing**
-   - **Context**: Security requirement for storing passwords.
-   - **Decision**: Use bcrypt for password hashing.
-   - **Rationale**: Industry standard for strong hashing.
-   - **Alternatives**: MD5, SHA-1; rejected for security inadequacy.
+## Configuration Details
 
-### Simplicity Gate Assessment
+### Environment Variables (as seen in `.env.example`)
 
-- **Appropriate**: Each technical element maps respectively to at least one FR. Implementation aligns with all specified FRs, no over-engineering detected.
+- **SMTP_HOST**: SMTP server hostname for email dispatch.
+- **SMTP_PORT**: Port for connecting to the SMTP server.
+- **EMAIL_FROM**: Sender email address configured for sending OTPs.
+- **SMTP_USER** and **SMTP_PASS**: Credentials for authenticating with the SMTP server.
+- **OTP_EXPIRY_MINUTES**: Time duration before an OTP expires.
 
-### Affected Services and API Changes
+Ensure these variables are correctly set up for the system to function as expected.
 
-- **Service Affected**: User Management Service
-- **API Changes**: Addition of endpoints `/api/v1/users/register` and integration of `/api/v1/users/otp/resend`.
+---
+
+This documentation should be updated concurrently with any changes to the registration process to maintain accuracy and completeness.
