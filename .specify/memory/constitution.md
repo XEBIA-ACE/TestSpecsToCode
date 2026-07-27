@@ -1,45 +1,66 @@
-# Constitution — US-001: View Account Information from Dashboard
+# Constitution: Python 3.8 to 3.12 Upgrade
 
-## Quality Principles
+## Project Identity
 
-### Performance Standards
-- Page load time must not exceed 1 second (P95) under normal load conditions
-- API response time for account information endpoint must be ≤ 500ms
-- Database queries must complete within 100ms; use connection pooling
-- Implement caching headers where appropriate to reduce redundant requests
+**Name:** Python Upgrade Project
 
-### Security Requirements
-- All data transmission must occur exclusively over HTTPS (TLS 1.2+)
-- Session validation must occur before any user data is retrieved or displayed
-- JWT tokens must be validated for expiry, signature, and issuer before granting access
-- Audit logs must not contain sensitive PII beyond user ID; no passwords or tokens in logs
-- Implement rate limiting on the account information endpoint to prevent enumeration attacks
+**Purpose:**  
+Upgrade the core Python runtime of the application from version 3.8 to 3.12.
 
-### Accessibility Standards (WCAG 2.1 Level AA)
-- Color contrast ratio must be at least 4.5:1 for normal text, 3:1 for large text
-- All interactive elements must be keyboard navigable with visible focus indicators
-- Screen reader support: proper ARIA labels, landmarks, and live regions
-- Form fields and data displays must have associated labels
-- No content should rely solely on color to convey information
+**High-Level Goal:**  
+Eliminate end-of-life risk and enable continued support by modernizing to Python 3.12.
 
-### Coding Standards
-- Follow existing hexagonal architecture patterns (ports/adapters)
-- Use strict mode ('use strict') in all JavaScript files
-- JSDoc comments required for all public functions and classes
-- Error handling must use domain-specific error classes from `domainErrors.js`
-- All new code must have corresponding unit tests with ≥80% coverage
-- Use async/await consistently; avoid callback patterns
-- Validate all inputs at the HTTP adapter layer using express-validator
+---
 
-### Architecture Guardrails
-- Read-only operations must not modify user state
-- Audit logging must be non-blocking (fire-and-forget with error logging)
-- Session/authentication middleware must be reusable across routes
-- Database access only through repository pattern (PostgresUserRepository)
-- Configuration values must come from `config/env.js`, never direct `process.env` access
+## Guiding Principles
 
-### Non-Functional Requirements
-- Audit log entries must include: timestamp (ISO 8601), user ID, action type, and IP address
-- System must gracefully handle database connection failures with appropriate error messages
-- Logging must use structured format via Winston logger
-- HTTP responses must include appropriate cache-control headers for security (no-store for sensitive data)
+1. **Prefer Python 3.12 features and compatibility over retaining legacy Python 3.8 syntax or behaviors, because end-of-life for Python 3.8 poses long-term support and security risks.**
+2. **Prioritize dependency updates and deprecations identified during the upgrade, because direct compatibility with the new Python runtime is essential for stability.**
+3. **Address upgrade blockers with minimally invasive code changes, because the upgrade urgency is medium and unnecessary risk should be avoided.**
+
+---
+
+## Constraints
+
+- **Timeline and Effort Ceiling:**  
+  Must complete upgrade within the person-day allocation of the selected "moderate" option.  
+  *(TODO: Specify number of person-days when available)*
+
+- **Technology Mandates:**  
+  - Python version must be upgraded from 3.8 to 3.12.
+  - No deviations from the targeted runtime version.
+
+- **Budget or Scope Freezes:**  
+  - Strictly limit work to changes required for the Python 3.12 upgrade and direct compatibility issues.
+  - No expansion to unrelated modernization or framework upgrades.
+
+---
+
+## Quality Standards
+
+- **Testing Coverage Floor:**  
+  All existing automated tests must pass under Python 3.12 before deployment.
+
+- **Code Review Requirements:**  
+  Every code change must be reviewed and approved by at least one other project contributor.
+
+- **Documentation Must-Haves:**  
+  Upgrade steps, compatibility notes, and known-deprecation workarounds must be documented in a migration guide.
+
+- **Deployment Gates:**  
+  Production deployment is gated on a successful test run with Python 3.12 and sign-off by the project owner.
+
+---
+
+## Decision Log
+
+| ID  | Decision                                               | Rationale                                                  | Status    |
+|-----|--------------------------------------------------------|------------------------------------------------------------|-----------|
+| 1   | Upgrade Python from 3.8 to 3.12                        | End-of-life risk and modern support                        | accepted  |
+| 2   | Scope limited to Python core runtime and direct issues | Option and analysis did not identify further expansion      | accepted  |
+| 3   | Apply "moderate" upgrade option effort ceiling         | Respect project capacity planning and maintainable pace     | accepted  |
+
+---
+
+**N/A — not applicable to this task:**  
+Sections or details not listed above are outside the defined scope and are intentionally omitted.
