@@ -1,45 +1,45 @@
-# Constitution — US-001: View Account Information from Dashboard
+# Constitution: SQLAlchemy 1.3 to 2.0.29 Upgrade
 
-## Quality Principles
+## Project Identity
 
-### Performance Standards
-- Page load time must not exceed 1 second (P95) under normal load conditions
-- API response time for account information endpoint must be ≤ 500ms
-- Database queries must complete within 100ms; use connection pooling
-- Implement caching headers where appropriate to reduce redundant requests
+**Name:** SQLAlchemy Modernization Project  
+**Purpose:** Update the application's ORM layer by upgrading SQLAlchemy from version 1.3 to 2.0.29.  
+**High-Level Goal:** Ensure continued maintainability, support, and access to recent SQLAlchemy features and fixes, while reducing risk linked to legacy library usage.
 
-### Security Requirements
-- All data transmission must occur exclusively over HTTPS (TLS 1.2+)
-- Session validation must occur before any user data is retrieved or displayed
-- JWT tokens must be validated for expiry, signature, and issuer before granting access
-- Audit logs must not contain sensitive PII beyond user ID; no passwords or tokens in logs
-- Implement rate limiting on the account information endpoint to prevent enumeration attacks
+## Guiding Principles
 
-### Accessibility Standards (WCAG 2.1 Level AA)
-- Color contrast ratio must be at least 4.5:1 for normal text, 3:1 for large text
-- All interactive elements must be keyboard navigable with visible focus indicators
-- Screen reader support: proper ARIA labels, landmarks, and live regions
-- Form fields and data displays must have associated labels
-- No content should rely solely on color to convey information
+1. **Prefer compatibility with SQLAlchemy 2.0 syntax and APIs over legacy patterns because version 1.3 is no longer maintained and poses tech debt.**
+2. **Prefer minimal breaking changes in application code over aggressive refactoring because the upgrade urgency is only medium and deeper refactoring is out of scope.**
+3. **Prefer timely upgrade execution over exhaustive unrelated improvements because the project's goal is strictly the SQLAlchemy upgrade.**
+4. **Prefer addressing deprecation warnings early over deferring corrections because this prevents latent runtime errors post-upgrade.**
 
-### Coding Standards
-- Follow existing hexagonal architecture patterns (ports/adapters)
-- Use strict mode ('use strict') in all JavaScript files
-- JSDoc comments required for all public functions and classes
-- Error handling must use domain-specific error classes from `domainErrors.js`
-- All new code must have corresponding unit tests with ≥80% coverage
-- Use async/await consistently; avoid callback patterns
-- Validate all inputs at the HTTP adapter layer using express-validator
+## Constraints
 
-### Architecture Guardrails
-- Read-only operations must not modify user state
-- Audit logging must be non-blocking (fire-and-forget with error logging)
-- Session/authentication middleware must be reusable across routes
-- Database access only through repository pattern (PostgresUserRepository)
-- Configuration values must come from `config/env.js`, never direct `process.env` access
+- **Timeline and Effort Ceiling:**  
+  Must not exceed the "moderate" estimate indicated in the upgrade option. (Exact person-days: TODO)
+- **Technology Mandates:**  
+  - Must upgrade only SQLAlchemy from 1.3 to 2.0.29.  
+  - Language, runtime, and build tool constraints: TODO — unknown.
+- **Budget or Scope Freezes:**  
+  - Out of scope: Any technology or feature upgrades not necessary for the SQLAlchemy transition.
+  - No changes to unrelated frameworks, libraries, runtimes, or cloud providers.
 
-### Non-Functional Requirements
-- Audit log entries must include: timestamp (ISO 8601), user ID, action type, and IP address
-- System must gracefully handle database connection failures with appropriate error messages
-- Logging must use structured format via Winston logger
-- HTTP responses must include appropriate cache-control headers for security (no-store for sensitive data)
+## Quality Standards
+
+- **Testing Coverage Floor:**  
+  All critical code paths using SQLAlchemy must have test coverage. (Threshold: 80% of ORM interaction logic—subject to existing test base. TODO: confirm with codebase.)
+- **Code Review Requirements:**  
+  At least one reviewer with SQLAlchemy upgrade experience must approve all changes.
+- **Documentation Must-Haves:**  
+  Migration notes and updated developer instructions covering incompatibilities and required code pattern updates.
+- **Deployment Gates:**  
+  Upgrade must pass all current CI workflows, including all unit, integration, and (if present) regression tests.
+
+## Decision Log
+
+| ID     | Decision                                         | Rationale                                         | Status     |
+|--------|--------------------------------------------------|---------------------------------------------------|------------|
+| ADR-01 | Target SQLAlchemy 2.0.29 specifically            | Maintenance, security, and support concerns        | accepted   |
+| ADR-02 | Scope freeze on non-SQLAlchemy dependencies      | Avoid cost and risk from unnecessary upgrades      | accepted   |
+| ADR-03 | Timeline set as "moderate" per option estimate   | Fit upgrade within resource and risk constraints   | accepted   |
+| ADR-04 | Testing focus on ORM interaction code paths      | Lower likelihood of regression in data layer       | accepted   |
