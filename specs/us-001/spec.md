@@ -1,117 +1,49 @@
-# Functional Specification — US-001: View Account Information from Dashboard
+---
+# Functional Specification: Sign in with a Connected SSO Account (US-001)
 
-## User Story Narrative
+## Narrative & Scope
 
-**As an** authenticated user  
-**I want to** view my account information from the dashboard  
-**So that** I can verify my personal details and account status are correct
+As a Shopping App user with a previously-linked Single Sign-On (SSO) account, I want to securely log in to my account using OAuth 2.0 (SSO button), and receive a Shopping App JWT and session, so that I can access my profile and purchasing features without entering my app-specific password.
 
-## Overview
-
-This feature enables authenticated users to access a dedicated account information page from their dashboard. The page displays core profile data in a read-only format, ensuring users can review but not modify their information through this interface. Every access to this page generates an audit trail for compliance and security monitoring.
-
-## Functional Requirements
-
-### FR-1: Dashboard Navigation Link
-- The user dashboard must display a clearly labeled link/button to access account information
-- The link must be keyboard accessible and have appropriate ARIA labels
-- Link text: "Account Information" or equivalent descriptive text
-
-### FR-2: Session Validation
-- Before displaying any account data, the system must validate the user's session
-- Valid session: proceed to load account information
-- Expired/invalid session: redirect user to login page with a re-authentication prompt
-- Session validation must occur server-side via JWT verification
-
-### FR-3: Account Information Display
-The page must display the following fields in read-only format:
-
-| Field | Description | Format |
-|-------|-------------|--------|
-| Name | User's full name (firstName + lastName) | Text |
-| Email | User's registered email address | Text |
-| Registration Date | Date the account was created | Localized date format |
-| Account Status | Current verification status | "Verified" or "Pending Verification" |
-
-### FR-4: Performance Requirement
-- The account information page must load and display data within 1 second of the user clicking the navigation link
-- This includes network round-trip, server processing, and client rendering
-
-### FR-5: Audit Logging
-- Each successful page access must create an audit log entry containing:
-  - Timestamp (ISO 8601 format)
-  - User ID (UUID)
-  - Action type: "ACCOUNT_INFO_VIEW"
-  - Client IP address (optional, if available)
-- Audit logging must not block the response to the user
-
-### FR-6: HTTPS Requirement
-- All data transmission between client and server must occur over HTTPS
-- The API endpoint must reject non-HTTPS requests in production
+This feature coexists with the legacy email/mobile + password login: both are available options. The system must validate the SSO provider token, verify user linkage, issue a session, and handle failures without exposing sensitive error details. SSO provider-specific configuration must be reused from the central authentication service.
 
 ## Acceptance Criteria
 
-1. **AC-1**: Given an authenticated user on the dashboard, when they click the account information link, then the account information page displays within 1 second
+1. **SSO-Linked Sign-in, Success:**
+   - GIVEN SSO is enabled and the user has a mapped SSO identity,
+   - WHEN SSO login is selected and authentication with the external provider succeeds,
+   - THEN the Shopping App must:
+     - Accept the provider's OAuth 2.0 token,
+     - Validate and link it to the internal user,
+     - Issue a JWT session as per Shopping App token policy,
+     - Redirect / respond with profile/home page.
 
-2. **AC-2**: Given the account information page loads, then it displays Name, Email, Registration Date, and Account Status in read-only format
+2. **SSO-Linked Sign-in, Failure:**
+   - GIVEN SSO is enabled,
+   - WHEN authentication at the provider fails or is denied,
+   - THEN respond with a generic error message ("Authentication failed. Please try again.") and do not indicate any field-specific or provider-specific detail.
 
-3. **AC-3**: Given the page loads successfully, then an audit log entry is created containing timestamp and user ID
+3. **Legacy Login Compatibility:**
+   - Legacy email/mobile + password logins must remain available and functional, with no UX or security regressions.
 
-4. **AC-4**: Given a user with an expired session attempts to access the page, then they are prompted to re-authenticate
+4. **Session Token Compliance:**
+   - JWT issued must include all current app claims (user id, expiry, etc) and have session expiry/timing identical to non-SSO logins.
 
-5. **AC-5**: Given the account information page, then it meets WCAG 2.1 Level AA compliance including proper contrast, keyboard navigation, and screen reader support
+5. **JWT Validation on API Requests:**
+   - After SSO sign-in, API endpoints must accept and validate the JWT as currently implemented for normal logins (until expiry).
 
-6. **AC-6**: Given any data transmission, then it occurs exclusively over HTTPS
+## Out-of-Scope
 
-## Out of Scope
-
-- Editing or updating account information (separate story)
-- Password change functionality
-- Account deletion from this page
-- Profile picture or avatar display
-- Two-factor authentication settings
-- Notification preferences
-- Linked accounts or social login management
-- Account activity history beyond the current audit log entry
+- SSO account linking process (this feature assumes the user’s identity is already mapped from an onboarding or profile management flow).
+- Sign-up/registration via SSO (only sign-in is in-scope).
+- SSO provider choice/selector UI.
+- Mobile app-specific implementation (web only for MVP).
+- Migration of legacy accounts to SSO.
 
 ## Cross-Service Dependencies
 
-| Dependency | Type | Description |
-|------------|------|-------------|
-| User Management Service | Internal | Source of user profile data via `userService.getUserById()` |
-| PostgreSQL Database | Infrastructure | Users table for profile data storage |
-| Authentication Middleware | Internal | JWT validation for session verification |
-| Audit Log Service | Internal (New) | Audit log persistence (may use existing logger or new table) |
+- Requires valid configuration for external OAuth providers (Google, etc), stored in the centralized config mechanism.
+- Shopping App JWT/session creation must use current signing keys, expiry durations, and claim structures defined by the app.
+- User identity lookups are performed via existing user service/database logic.
 
-## Error Handling
-
-| Scenario | Expected Behavior |
-|----------|-------------------|
-| Invalid/expired JWT | Return 401 Unauthorized, redirect to login |
-| User not found (edge case) | Return 404 Not Found with generic message |
-| Database unavailable | Return 503 Service Unavailable |
-| Internal server error | Return 500 with logged details, generic user message |
-
-## API Contract
-
-**Endpoint**: `GET /api/v1/users/me/account`
-
-**Headers**:
-- `Authorization: Bearer <JWT>` (required)
-
-**Success Response** (200 OK):
-```json
-{
-  "data": {
-    "name": "Alice Smith",
-    "email": "alice@example.com",
-    "registrationDate": "2024-01-15T10:30:00Z",
-    "accountStatus": "Verified"
-  }
-}
-```
-
-**Error Responses**:
-- 401 Unauthorized: `{"error": "Session expired. Please log in again."}`
-- 404 Not Found: `{"error": "Account not found"}`
-- 500 Internal Server Error: `{"error": "An unexpected error occurred"}`
+---
