@@ -1,0 +1,147 @@
+openspec: '1.0'
+story:
+  id: US-006
+  title: Resend OTP for Account Verification
+  description: As a user who did not receive my OTP or whose OTP has expired, I want
+    to request a new OTP, so that I can complete my account verification.
+  feature:
+    id: F-02
+    title: OTP Verification
+  epic:
+    id: EP-001
+    title: OTP Generation and Sending
+  status: draft
+functional_requirement:
+  description: "## S-001\n\n### Purpose\n\nTo facilitate users in resending an OTP\
+    \ to complete account verification through the User Management Service.\n\n###\
+    \ Scope\n\nThis specification covers functionality for resending OTPs, including\
+    \ generating new OTPs, invalidating old ones, delivering OTPs, informing users\
+    \ of delivery outcomes, and audit logging within the User Management Service.\n\
+    \n### Non-Goals\n\n1. Implementing delivery mechanisms other than email\n2. Handling\
+    \ user authentication \n3. Managing user session or login-related functionalities\n\
+    4. Designing email content or templates\n5. Verifying user identity beyond OTP\n\
+    6. Handling non-OTP related notifications\n7. Managing any OTP related to payments\n\
+    8. Providing analytics on OTP usage\n9. Allowing OTP resend through means other\
+    \ than the verification screen\n\n### Key Entities\n\n- **User**: (userId: String)\n\
+    - **OTP**: (value: String, expiration: DateTime, status: String)\n- **RequestLog**:\
+    \ (requestId: String, userId: String, timestamp: DateTime, action: String)\n\n\
+    ### Functional Requirements\n\n- **FR-001**: User Management Service SHALL allow\
+    \ users to request a new OTP from the verification screen.\n- **FR-002**: User\
+    \ Management Service MUST generate and send a new OTP via email when a request\
+    \ is made.\n- **FR-003**: User Management Service MUST invalidate any previously\
+    \ issued OTP upon generation of a new OTP.\n- **FR-004**: User Management Service\
+    \ SHALL inform users about the success or failure of the OTP email delivery.\n\
+    - **FR-005**: User Management Service MUST reject OTP resend requests after five\
+    \ attempts in the last hour.\n- **FR-006**: User Management Service SHALL log\
+    \ each OTP resend request for auditing purposes.\n\n### Assumptions\n\n- **A-001**:\
+    \ Users have provided a valid email address. (FR-002, FR-004)\n- **A-002**: Email\
+    \ delivery processes comply with the standard delivery methods established. (FR-002,\
+    \ FR-004)\n- **A-003**: All users requesting OTPs are authenticated users on the\
+    \ verification screen. (FR-001, FR-005)\n- **A-004**: 5-resend limit is measured\
+    \ within a rolling one-hour window. (FR-005)\n\n### Success Criteria\n\n- **SC-001**:\
+    \ The ratio of successful OTP deliveries should be greater than 95%.\n- **SC-002**:\
+    \ Rate limiting should reject at least 99% of requests exceeding the threshold.\n\
+    - **SC-003**: 100% of attempts must be logged for audit purposes.\n\n### Priority\
+    \ Levels\n\n- **P1**: FR-001, FR-002, FR-003\n- **P2**: FR-004, FR-005, FR-006\n\
+    - **P3**: None identified\n\n### Edge Cases\n\n- **EC-001**: Given incorrect userId,\
+    \ When an OTP resend is requested, Then the request is rejected.\n- **EC-002**:\
+    \ Given network failure during email delivery, When OTP is sent, Then the user\
+    \ is informed of the failure.\n- **EC-003**: Given a user changes their email,\
+    \ When a new OTP is requested, Then it MUST be sent to the updated email.\n\n\
+    ### Independent Testability\n\nPreconditions:\n1. User exists and email is valid\n\
+    2. User is on the verification screen\n3. Previous OTP expired\n\nUser Action:\n\
+    - User requests a new OTP\n\nObservable Outcome:\n- User receives OTP via email\
+    \ successfully\n\n### Separation of Concerns\n\nThis specification defines capabilities\
+    \ and does not detail underlying implementations like HTTP codes or dataframe\
+    \ structures. Error conditions are described by user outcomes. Integration with\
+    \ external systems is noted, without specific product details."
+  acceptance_criteria:
+  - given_when_then: Given a user is on the verification screen, When they request
+      a new OTP, Then the system processes the resend request
+  - given_when_then: Given a user requests a new OTP, When the new OTP is generated,
+      Then any previously issued OTP for that user is invalidated
+  - given_when_then: Given a new OTP is generated, When the system processes the request,
+      Then the OTP is sent via email following the standard delivery process
+  - given_when_then: Given a user requests a new OTP, When the delivery succeeds or
+      fails, Then the user is informed of the outcome
+  - given_when_then: Given a user has made 5 resend requests within the last hour,
+      When they attempt another resend, Then the request is rejected due to rate limiting
+  - given_when_then: Given any resend request is made, When the request is processed,
+      Then the attempt is logged for auditing purposes
+  epic_acceptance_criteria:
+  - given_when_then: Given a user requests an OTP, when the request is valid, then
+      the system generates and sends a unique OTP
+  - given_when_then: Given an OTP is sent, when it is entered by the user within 5
+      minutes, then the system should validate and authenticate the user
+  - given_when_then: Given an OTP request, when the OTP delivery fails, then the system
+      retries up to 3 times
+  - given_when_then: Given a user requests an OTP, when the OTP exceed expiry time,
+      then the system should reject the OTP with an error message
+technical_design:
+  description: "## S-001\n\n### Contracts & Interfaces\n\n1. **Endpoint Changes**\
+    \  \n   - **Method**: POST  \n   - **Path**: `/users/{userId}/otp/resend`  \n\
+    \   - **Description**: This endpoint SHALL handle requests to resend OTPs.  \n\
+    \   - **Request Payload**: Empty. The userId SHALL be fetched from the path.\n\
+    \   - **Response Codes**: \n     - `200 OK`: OTP sent successfully.\n     - `400\
+    \ Bad Request`: Exceeded resend attempts or invalid/missing parameters.\n    \
+    \ - `500 Internal Server Error`: General failure in OTP generation or sending.\n\
+    \   - **Response Payload**: \n     - On success: `{ \"message\": \"OTP sent successfully\"\
+    \ }`\n     - On failure: `{ \"error\": \"Detailed error message\" }`\n\n2. **Data\
+    \ Model Changes**\n   - **User** Table  \n     - No changes required.\n   - **OTP**\
+    \ Table  \n     - Columns: `value: VARCHAR(6), expiration: TIMESTAMP, status:\
+    \ ENUM('ACTIVE', 'INACTIVE')`\n     - Add index on `(userId, status)` for quick\
+    \ invalidation queries.\n   - **RequestLog** Table  \n     - Columns: `requestId:\
+    \ UUID, userId: UUID, timestamp: TIMESTAMP, action: VARCHAR(50)`\n     - The action\
+    \ column SHALL include 'OTP_RESEND'.\n\n### Test Strategy\n\n1. **Test Case: Valid\
+    \ Resend Request**  \n   - **Objective**: Validate FR-001, FR-002.  \n   - **Setup**:\
+    \ User exists, OTPs previously expired.  \n   - **Execution**: Call `/users/{userId}/otp/resend`.\
+    \  \n   - **Validation**: Response is `200 OK`, OTP entry has `status = 'ACTIVE'`.\n\
+    \n2. **Test Case: Invalid Request Exceeding Limit**  \n   - **Objective**: Validate\
+    \ FR-005.  \n   - **Setup**: User has made 5 resend requests within the last hour.\
+    \  \n   - **Execution**: Call `/users/{userId}/otp/resend`.  \n   - **Validation**:\
+    \ Response is `400 Bad Request`, error message states limit exceeded.\n\n3. **Test\
+    \ Case: OTP Email Delivery Failure**  \n   - **Objective**: Validate FR-004. \
+    \ \n   - **Setup**: Simulate email service downtime.  \n   - **Execution**: Call\
+    \ `/users/{userId}/otp/resend`.  \n   - **Validation**: Response contains appropriate\
+    \ error message about delivery failure.\n\n4. **Test Case: Audit Logging**  \n\
+    \   - **Objective**: Validate FR-006.  \n   - **Setup**: Prepare database audit\
+    \ trail.  \n   - **Execution**: Call `/users/{userId}/otp/resend`.  \n   - **Validation**:\
+    \ Verify `RequestLog` contains new 'OTP_RESEND' record.\n\n### Implementation\
+    \ Approach\n\n1. **Core Implementation Logic**\n   - **ResendOtpService** Class\n\
+    \     - **Method**: `resendOtp(String userId)`\n     - Invalidate existing OTP:\
+    \ Update OTP table, set `status = 'INACTIVE'` where `userId` is the target.\n\
+    \     - Generate new OTP: Create a new entry in OTP table with `status = 'ACTIVE'`.\n\
+    \     - Rate limiting check: Review RequestLog for past hour OTP_RESEND entries.\n\
+    \     - Utilize `EmailService` to send OTP to user's email.\n     - On success\
+    \ or failure, update the RequestLog table.\n\n2. **Inter-service Calls**\n   -\
+    \ **EmailService**: Asynchronous call pattern using retry mechanism for handling\
+    \ temporary email sending failures.\n\n3. **Testing Approach**\n   - Unit tests\
+    \ SHALL mock `Database` and `EmailService` responses.\n   - Integration tests\
+    \ SHALL deploy the service in an isolated test environment with a mock email server\
+    \ to simulate delivery conditions.\n\n### Architectural Decision Records\n\n1.\
+    \ **ADR-001**: Use Asynchronous Email Delivery\n   - **Context**: Email delivery\
+    \ must handle network delays and ensure high availability.\n   - **Decision**:\
+    \ Adopt asynchronous email sending with retries.\n   - **Rationale**: Increases\
+    \ resilience against temporary network issues.\n   - **Alternative Considered**:\
+    \ Synchronous email sending; rejected due to potential blocking delays.\n\n2.\
+    \ **ADR-002**: Centralized Rate Limiting Mechanism\n   - **Context**: Prevent\
+    \ abuse by users repeatedly resending OTPs.\n   - **Decision**: Implement rate\
+    \ limiting using the existing database audit log.\n   - **Rationale**: Simple\
+    \ integration with existing logging infrastructure.\n   - **Alternative Considered**:\
+    \ Third-party rate limiter service; rejected due to unnecessary complexity and\
+    \ cost.\n\n### Simplicity Gate Assessment\n- **Appropriate**: All technical elements\
+    \ map directly to specific functional requirements. Each API method and database\
+    \ operation is traceable to single or multiple functional criteria (e.g., rate\
+    \ limiting logic directly supports FR-005)."
+  affected_services:
+  - id: S-001
+  api_changes:
+  - service: S-001
+    endpoint: /users/{userId}/otp/resend
+    method: POST
+    change_type: modify
+  - service: S-001
+    endpoint: /otp/audit
+    method: GET
+    change_type: modify
+gaps: []
