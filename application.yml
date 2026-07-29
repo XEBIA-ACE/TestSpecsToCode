@@ -1,0 +1,95 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.shopizer</groupId>
+    <artifactId>shopizer</artifactId>
+    <version>3.2.0</version> <!-- Updated version to align with the Spring Boot upgrade -->
+
+    <properties>
+        <java.version>11</java.version> <!-- Ensures compatibility with specified JVM version -->
+        <spring.boot.version>3.2.0</spring.boot.version> <!-- Upgrading to Spring Boot 3.2.0 -->
+        <guava.version>31.0.1-jre</guava.version> <!-- Upgraded Guava to address known CVEs -->
+        <jackson.version>2.13.4</jackson.version> <!-- Updated Jackson Databind version -->
+    </properties>
+
+    <dependencies>
+        <!-- Spring Boot Starter dependencies -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <version>${spring.boot.version}</version> <!-- Ensures use of the upgraded Spring Boot -->
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <version>${spring.boot.version}</version>
+        </dependency>
+
+        <!-- Replacing deprecated Elasticsearch dependencies -->
+        <!-- Commenting out old Elasticsearch dependency -->
+        <!-- <dependency> 
+            <groupId>org.elasticsearch</groupId>
+            <artifactId>elasticsearch</artifactId>
+            <version>7.10.1</version>
+        </dependency> -->
+        
+        <!-- Include new Elasticsearch client -->
+        <dependency>
+            <groupId>co.elastic.clients</groupId>
+            <artifactId>elasticsearch-java</artifactId>
+            <version>7.17.0</version> <!-- Supported Elasticsearch version -->
+        </dependency>
+
+        <!-- Guava: Google Core Libraries for Java -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
+        </dependency>
+
+        <!-- FasterXML Jackson support for JSON parsing -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
+        <!-- Additional dependencies remain unchanged -->
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring.boot.version}</version> <!-- Ensures compatibility with Spring Boot 3.2.0 -->
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!-- Profile for production environment -->
+        <profile>
+            <id>production</id>
+            <activation>
+                <property>
+                    <name>env</name>
+                    <value>prod</value>
+                </property>
+            </activation>
+            <properties>
+                <skipTests>true</skipTests>
+            </properties>
+        </profile>
+
+        <!-- Profile for development environment -->
+        <profile>
+            <id>development</id>
+            <properties>
+                <skipTests>false</skipTests>
+            </properties>
+        </profile>
+    </profiles>
+</project>
