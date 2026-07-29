@@ -1,45 +1,69 @@
-# Constitution — US-001: View Account Information from Dashboard
+# Constitution: SQLAlchemy ORM and Model Modernization
 
-## Quality Principles
+## Project Identity
 
-### Performance Standards
-- Page load time must not exceed 1 second (P95) under normal load conditions
-- API response time for account information endpoint must be ≤ 500ms
-- Database queries must complete within 100ms; use connection pooling
-- Implement caching headers where appropriate to reduce redundant requests
+**Name:** SQLAlchemy 2.x ORM & Model Upgrade
 
-### Security Requirements
-- All data transmission must occur exclusively over HTTPS (TLS 1.2+)
-- Session validation must occur before any user data is retrieved or displayed
-- JWT tokens must be validated for expiry, signature, and issuer before granting access
-- Audit logs must not contain sensitive PII beyond user ID; no passwords or tokens in logs
-- Implement rate limiting on the account information endpoint to prevent enumeration attacks
+**Purpose:**  
+Migrate existing ORM and model usage to be fully compatible with SQLAlchemy 2.x.
 
-### Accessibility Standards (WCAG 2.1 Level AA)
-- Color contrast ratio must be at least 4.5:1 for normal text, 3:1 for large text
-- All interactive elements must be keyboard navigable with visible focus indicators
-- Screen reader support: proper ARIA labels, landmarks, and live regions
-- Form fields and data displays must have associated labels
-- No content should rely solely on color to convey information
+**High-Level Goal:**  
+Ensure project ORM code is modernized to comply with SQLAlchemy 2.x standards, addressing deprecations and leveraging new APIs where relevant.
 
-### Coding Standards
-- Follow existing hexagonal architecture patterns (ports/adapters)
-- Use strict mode ('use strict') in all JavaScript files
-- JSDoc comments required for all public functions and classes
-- Error handling must use domain-specific error classes from `domainErrors.js`
-- All new code must have corresponding unit tests with ≥80% coverage
-- Use async/await consistently; avoid callback patterns
-- Validate all inputs at the HTTP adapter layer using express-validator
+---
 
-### Architecture Guardrails
-- Read-only operations must not modify user state
-- Audit logging must be non-blocking (fire-and-forget with error logging)
-- Session/authentication middleware must be reusable across routes
-- Database access only through repository pattern (PostgresUserRepository)
-- Configuration values must come from `config/env.js`, never direct `process.env` access
+## Guiding Principles
 
-### Non-Functional Requirements
-- Audit log entries must include: timestamp (ISO 8601), user ID, action type, and IP address
-- System must gracefully handle database connection failures with appropriate error messages
-- Logging must use structured format via Winston logger
-- HTTP responses must include appropriate cache-control headers for security (no-store for sensitive data)
+1. **Prefer compliance with SQLAlchemy 2.x APIs over legacy usage:**  
+   Because ongoing 2.x changes will remove deprecated patterns, modern code minimizes technical debt and future upgrade risk.
+
+2. **Prefer automated refactoring over manual edits where possible:**  
+   To reduce human error and maintain consistency across large codebases impacted by API changes.
+
+3. **Prefer minimal diffs (no-op and nonfunctional changes) when possible:**  
+   To facilitate easier code review, regression detection, and if necessary, rollback.
+
+4. **Prefer clear mappings between old and new ORM patterns:**  
+   To ensure maintainers can trace how previous logic is preserved, reducing onboarding and support complexity during and after the upgrade.
+
+---
+
+## Constraints
+
+- **Timeline / Effort Ceiling:**  
+  Must be achievable within the budget and schedule of option 'moderate'; actual person-days not specified, so scope creep is prohibited.  
+- **Technology Mandates:**  
+  - All ORM/model code must be compatible with SQLAlchemy 2.x.  
+- **Budget or Scope Freeze:**  
+  - No expansion beyond ORM and model code upgrade for SQLAlchemy 2.x compatibility.  
+  - No unrelated refactors or feature work permitted.  
+- **Other Mandates:**  
+  - N/A — not applicable to this task.
+
+---
+
+## Quality Standards
+
+- **Testing:**  
+  - All upgraded ORM/model paths must be exercised by existing or new automated tests, achieving 100% coverage on affected lines.
+- **Code Review:**  
+  - Every change must be reviewed by at least one engineer with SQLAlchemy experience.
+- **Documentation:**  
+  - All non-obvious changes or new idioms must be documented inline as code comments.
+  - Upgrade rationale and migration notes must be appended to the project's CHANGELOG or migration guide.
+- **Deployment Gates:**  
+  - No deployment unless all affected tests pass and a code reviewer has explicitly approved the upgrade pull request.
+
+---
+
+## Decision Log
+
+| ID   | Decision                                                   | Rationale                                      | Status     |
+|------|------------------------------------------------------------|------------------------------------------------|------------|
+| 1    | Target SQLAlchemy 2.x as compatibility baseline            | Upgrade goal mandates 2.x compliance           | accepted   |
+| 2    | Limit scope to ORM/model code; exclude non-ORM refactors   | Option only authorizes SQLAlchemy ORM upgrade  | accepted   |
+| 3    | Testing coverage for affected code must be 100%            | Ensure regression-free migration               | accepted   |
+
+---
+
+_Note: All other context (language, runtime, build tool) is unknown. TODOs to be addressed as discovered._
