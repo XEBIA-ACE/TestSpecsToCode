@@ -1,45 +1,62 @@
-# Constitution — US-001: View Account Information from Dashboard
+# Constitution: Replace Hardcoded Secrets with Environment Variables
 
-## Quality Principles
+## Project Identity
 
-### Performance Standards
-- Page load time must not exceed 1 second (P95) under normal load conditions
-- API response time for account information endpoint must be ≤ 500ms
-- Database queries must complete within 100ms; use connection pooling
-- Implement caching headers where appropriate to reduce redundant requests
+**Name:** Replace Hardcoded Secrets with Environment Variables
 
-### Security Requirements
-- All data transmission must occur exclusively over HTTPS (TLS 1.2+)
-- Session validation must occur before any user data is retrieved or displayed
-- JWT tokens must be validated for expiry, signature, and issuer before granting access
-- Audit logs must not contain sensitive PII beyond user ID; no passwords or tokens in logs
-- Implement rate limiting on the account information endpoint to prevent enumeration attacks
+**Purpose:**  
+Modernize the codebase by eliminating hardcoded secrets from source code and replacing them with environment variable references.
 
-### Accessibility Standards (WCAG 2.1 Level AA)
-- Color contrast ratio must be at least 4.5:1 for normal text, 3:1 for large text
-- All interactive elements must be keyboard navigable with visible focus indicators
-- Screen reader support: proper ARIA labels, landmarks, and live regions
-- Form fields and data displays must have associated labels
-- No content should rely solely on color to convey information
+**High-level Goal:**  
+Mitigate security and compliance risks associated with embedded secrets by externalizing all secrets as environment variables.
 
-### Coding Standards
-- Follow existing hexagonal architecture patterns (ports/adapters)
-- Use strict mode ('use strict') in all JavaScript files
-- JSDoc comments required for all public functions and classes
-- Error handling must use domain-specific error classes from `domainErrors.js`
-- All new code must have corresponding unit tests with ≥80% coverage
-- Use async/await consistently; avoid callback patterns
-- Validate all inputs at the HTTP adapter layer using express-validator
+---
 
-### Architecture Guardrails
-- Read-only operations must not modify user state
-- Audit logging must be non-blocking (fire-and-forget with error logging)
-- Session/authentication middleware must be reusable across routes
-- Database access only through repository pattern (PostgresUserRepository)
-- Configuration values must come from `config/env.js`, never direct `process.env` access
+## Guiding Principles
 
-### Non-Functional Requirements
-- Audit log entries must include: timestamp (ISO 8601), user ID, action type, and IP address
-- System must gracefully handle database connection failures with appropriate error messages
-- Logging must use structured format via Winston logger
-- HTTP responses must include appropriate cache-control headers for security (no-store for sensitive data)
+1. **Prefer Environment Variables over Hardcoded Values because of Security and Compliance Risks.**  
+   - Hardcoded secrets pose exposure risks and violate common compliance standards; using environment variables mitigates these issues.
+
+2. **Prefer Explicit Failure over Silent Fallbacks when Secrets are Missing.**  
+   - If required secrets are absent in the environment, the system should fail clearly to prevent accidental insecure operation.
+
+---
+
+## Constraints
+
+- **Timeline and Effort Ceiling:**  
+  N/A — not applicable to this task (upgrade person-days estimate not provided).
+
+- **Technology Mandates:**  
+  N/A — specific language, runtime, or cloud requirements are unknown.
+
+- **Budget or Scope Freeze:**  
+  N/A — not specified in upgrade option.
+
+---
+
+## Quality Standards
+
+- **Testing Coverage:**  
+  - All code paths involving secret retrieval must be covered by automated tests to confirm correct error handling for missing or malformed secrets.
+
+- **Code Review:**  
+  - All changes must undergo peer review specifically checking for removal of hardcoded secrets and correct use of environment variables.
+
+- **Documentation:**  
+  - Document all expected environment variables and their purposes in a centralized configuration or environment setup guide.
+
+- **Deployment Gates:**  
+  - The deployment process must verify the presence of all required environment variables prior to starting any application instance.
+
+---
+
+## Decision Log
+
+| ID  | Decision                                                   | Rationale                                                            | Status     |
+|-----|------------------------------------------------------------|----------------------------------------------------------------------|------------|
+| 1   | Secrets must not be hardcoded; use environment variables   | Tech analysis highlights security and compliance risk from hardcoded secrets | Accepted   |
+| 2   | Fail fast if required environment variable is missing      | Prevents insecure or misconfigured deployments                       | Accepted   |
+| 3   | Document all environment variables' roles and expected values | Ensures maintainability and onboarding for future developers         | Accepted   |
+
+---
