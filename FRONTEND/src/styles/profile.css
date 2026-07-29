@@ -1,0 +1,66 @@
+/*
+  Profile View Stylesheet
+  This file contains styles specific to the user's profile view.
+  Ensure alignment with branding and usability standards.
+*/
+
+/* Body styling to ensure text readability and overall page aesthetics */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f9; /* Soft background color for subdued look */
+  color: #333; /* Standard text color */
+}
+
+/* Container for profile details to ensure adequate spacing and alignment */
+.profile-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #fff; /* White background for contrast */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+  border-radius: 8px;
+}
+
+/* Header styling for clear section separation */
+.profile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid #eaeaea;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.profile-header h2 {
+  margin: 0;
+}
+
+/* Styling for grouped profile information items */
+.profile-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.profile-details .detail {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.profile-details .detail:last-child {
+  border-bottom: none;
+}
+
+/* Label and content styling for better readability */
+.detail-label {
+  font-weight: bold;
+  color: #555;
+}
+
+detail-content {
+  color: #777;
+}

@@ -1,0 +1,25 @@
+/* ProfileView.css */
+
+.profile-view {
+  font-family: Arial, sans-serif;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.profile-view h1 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.profile-view p {
+  font-size: 18px;
+  margin: 10px 0;
+}
+
+.profile-view strong {
+  color: #333;
+}
