@@ -1,0 +1,5 @@
+- [ ] Create `updateUserProfile` function in `BACKEND/src/repositories/user.repository.ts`.
+- [ ] Add new POST endpoint in `BACKEND/src/routes/user-profile.routes.ts` for profile updates.
+- [ ] Update `FRONTEND/src/components/UserProfileForm.tsx` to handle save operations.
+- [ ] Implement unit tests for the `updateUserProfile` function in `app/tests/userService.test.js`.
+- [ ] Write integration tests to validate profile update API in `app/tests/accountInfo.test.js`.
