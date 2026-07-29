@@ -1,0 +1,79 @@
+version: 2.1
+
+executors:
+  maven-java:
+    docker:
+      - image: cimg/openjdk:17.0  # Upgraded to OpenJDK 17 to satisfy Spring Boot 3.x requirements
+    working_directory: ~/shopizer
+
+jobs:
+  build:
+    executor: maven-java
+    steps:
+      - checkout
+      - run:
+          name: Set up environment variables
+          command: |
+            export SPRING_PROFILES_ACTIVE=ci  # Use env config for cloud Native practices
+      - run:
+          name: Cache Maven dependencies
+          command: |
+            mvn dependency:go-offline
+      - restore_cache:
+          keys:
+            - maven-deps-{{ checksum "pom.xml" }}
+      - run:
+          name: Build with Maven
+          command: |
+            mvn -B clean install
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: maven-deps-{{ checksum "pom.xml" }}
+
+  test:
+    executor: maven-java
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - maven-deps-{{ checksum "pom.xml" }}
+      - run:
+          name: Run tests
+          command: |
+            mvn test  # Standardized Maven test step
+
+  docker-build:
+    executor: maven-java
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 20.10.18  # Ensures compatibility with modern container builds
+      - run:
+          name: Build Docker image for Shopizer API
+          command: |
+            docker build -t shopizer-api:ci .
+      - run:
+          name: Export Docker image
+          command: |
+            docker save shopizer-api:ci > shopizer-api.tar
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
+      - docker-build:
+          requires:
+            - test
+
+# Notes:
+# - OpenJDK base image updated to 17 to support Spring Boot 3.2.x (previous was Java 11).
+# - Adopted environment variable for SPRING_PROFILES_ACTIVE for 12-factor/cloud Native pattern.
+# - Maven build and test steps revalidated for compatibility with upgraded dependency tree.
+# - Docker steps updated for containerized use.
+# - No deprecated keys found or removed.
+# - Utilize cache for Maven dependencies to optimize CI runs.
