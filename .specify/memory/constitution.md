@@ -1,45 +1,18 @@
-# Constitution — US-001: View Account Information from Dashboard
+# Constitution
 
-## Quality Principles
+This section describes the quality standards and coding practices that need to be adhered to while upgrading the Jackson Databind library.
 
-### Performance Standards
-- Page load time must not exceed 1 second (P95) under normal load conditions
-- API response time for account information endpoint must be ≤ 500ms
-- Database queries must complete within 100ms; use connection pooling
-- Implement caching headers where appropriate to reduce redundant requests
+## Code Quality
+- Follow the organization's code style guidelines for Java.
+- Ensure all new or modified code is covered by unit tests.
+- Conduct peer reviews for any code adjustments related to the library upgrade.
 
-### Security Requirements
-- All data transmission must occur exclusively over HTTPS (TLS 1.2+)
-- Session validation must occur before any user data is retrieved or displayed
-- JWT tokens must be validated for expiry, signature, and issuer before granting access
-- Audit logs must not contain sensitive PII beyond user ID; no passwords or tokens in logs
-- Implement rate limiting on the account information endpoint to prevent enumeration attacks
+## Security and Compliance
+- Validate that the new Jackson version addresses any known vulnerabilities.
+- Ensure compliance with internal security policies and external regulations.
 
-### Accessibility Standards (WCAG 2.1 Level AA)
-- Color contrast ratio must be at least 4.5:1 for normal text, 3:1 for large text
-- All interactive elements must be keyboard navigable with visible focus indicators
-- Screen reader support: proper ARIA labels, landmarks, and live regions
-- Form fields and data displays must have associated labels
-- No content should rely solely on color to convey information
+## Testing Coverage
+- Maintain and enhance test coverage related to JSON processing and HTTP message conversion functionalities.
 
-### Coding Standards
-- Follow existing hexagonal architecture patterns (ports/adapters)
-- Use strict mode ('use strict') in all JavaScript files
-- JSDoc comments required for all public functions and classes
-- Error handling must use domain-specific error classes from `domainErrors.js`
-- All new code must have corresponding unit tests with ≥80% coverage
-- Use async/await consistently; avoid callback patterns
-- Validate all inputs at the HTTP adapter layer using express-validator
-
-### Architecture Guardrails
-- Read-only operations must not modify user state
-- Audit logging must be non-blocking (fire-and-forget with error logging)
-- Session/authentication middleware must be reusable across routes
-- Database access only through repository pattern (PostgresUserRepository)
-- Configuration values must come from `config/env.js`, never direct `process.env` access
-
-### Non-Functional Requirements
-- Audit log entries must include: timestamp (ISO 8601), user ID, action type, and IP address
-- System must gracefully handle database connection failures with appropriate error messages
-- Logging must use structured format via Winston logger
-- HTTP responses must include appropriate cache-control headers for security (no-store for sensitive data)
+## Documentation
+- Update system documentation to reflect the changes in the library version as well as any new patterns or practices adopted due to the update.
