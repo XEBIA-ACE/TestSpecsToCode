@@ -1,0 +1,3 @@
+## Business-level Requirement Specification
+
+The primary requirement is to upgrade the Guava library from version 27.1-jre to the latest stable version in the Shopizer application. Given the absence of specific information about language, runtime, or build tool, manual inspection beyond CAST Imaging may be necessary to precisely locate the Guava dependency and to ensure the upgrade is correctly implemented.
