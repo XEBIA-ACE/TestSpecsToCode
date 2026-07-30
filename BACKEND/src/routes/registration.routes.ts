@@ -1,57 +1,44 @@
-/**
- * registration.routes.ts
- *
- * Factory function that wires all dependencies and returns an Express Router
- * mounted at POST / (parent app mounts this at /api/v1/users).
- */
-
-import { Router } from 'express';
-import type { Database } from 'better-sqlite3';
-import { Redis } from 'ioredis';
-import { DefaultRegistrationValidator } from '../validators/registration.validator';
-import { DefaultEmailValidator } from '../validators/email.validator';
-import { DefaultPasswordPolicyEvaluator } from '../validators/password-policy.evaluator';
-import { DefaultUsernameUniquenessValidator } from '../validators/username-uniqueness.validator';
+```typescript
+import { Router, Request, Response } from 'express';
 import { UserRepository } from '../repositories/user.repository';
-import { OtpRequestRepository } from '../repositories/otp-request.repository';
-import { DefaultRegistrationService } from '../services/registration.service';
-import { DefaultOtpService } from '../services/otp.service';
-import { RedisRateLimitGuard } from '../services/rate-limit.guard';
-import { OtpDeliveryPort } from '../adapters/otp-delivery.port';
-import { RegistrationController } from '../controllers/registration.controller';
+import { TokenRepository } from '../repositories/token.repository';
+import { SendGridEmailAdapter } from '../adapters/sendgrid-email.adapter';
+import crypto from 'crypto';
 
-/**
- * Create and return the registration router.
- * @param db - Shared SQLite connection injected from app.ts / server.ts.
- * @param redis - Shared Redis client (OTP rate-limit guard), owned by server.ts.
- * @param otpDeliveryPort - Shared OTP email delivery adapter, owned by server.ts.
- */
-export function createRegistrationRouter(
-  db: Database,
-  redis: Redis,
-  otpDeliveryPort: OtpDeliveryPort,
-): Router {
+function generateEmailVerificationToken() {
+  return crypto.randomBytes(32).toString('hex');
+}
+
+export function createRegistrationRouter(userRepository: UserRepository, tokenRepository: TokenRepository, emailAdapter: SendGridEmailAdapter): Router {
   const router = Router();
 
-  const userRepo = new UserRepository(db);
-  const otpService = new DefaultOtpService(
-    userRepo,
-    new OtpRequestRepository(db),
-    new RedisRateLimitGuard(redis),
-    otpDeliveryPort,
-    db,
-  );
-  const controller = new RegistrationController(
-    new DefaultRegistrationValidator(),
-    new DefaultEmailValidator(),
-    new DefaultPasswordPolicyEvaluator(),
-    new DefaultUsernameUniquenessValidator(userRepo),
-    new DefaultRegistrationService(db),
-    otpService,
-  );
+  router.post('/register', async (req: Request, res: Response) => {
+    try {
+      const { name, email, password } = req.body;
+      const user = await userRepository.createUser(name, email, password);
+      
+      const token = generateEmailVerificationToken();
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
+      
+      await tokenRepository.saveVerificationToken(user.id, token, expiresAt);
 
-  // POST /api/v1/users/register  (parent mounts at /api/v1/users)
-  router.post('/register', (req, res) => { void controller.registerUser(req, res); });
+      const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
+      const emailContent = {
+        to: email,
+        from: process.env.SENDGRID_VERIFIED_SENDER,
+        subject: 'Verify your email address',
+        text: `Please verify your account by clicking on the following link: ${verificationLink}`,
+        html: `<p>Please verify your account by clicking on the following link: <a href="${verificationLink}">Verify Email</a></p>`,
+      };
+      
+      await emailAdapter.send(emailContent);
+
+      res.status(201).json({ message: 'User registered. Please check your email for verification link.', user: { id: user.id, name: user.name, email: user.email } });
+    } catch (error) {
+      res.status(500).json({ error: 'Could not register user.' });
+    }
+  });
 
   return router;
 }
+```

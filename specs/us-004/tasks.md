@@ -1,0 +1,11 @@
+- BACKEND
+  - [ ] Update `BACKEND/db/migrations` to add email verification field to users table.
+  - [ ] Modify `BACKEND/src/app.ts` and create necessary routes in `BACKEND/src/routes/activation.routes.ts` to support email verification.
+  - [ ] Use `BACKEND/scripts/test-sendgrid.ts` to implement email sending logic upon registration.
+  - [ ] Update user registration logic in `BACKEND/src/routes/registration.routes.ts` to initiate verification email sending.
+  - [ ] Implement logic in `BACKEND/src/app.ts` to restrict access for unverified email accounts during authentication checks.
+- Documentation
+  - [ ] Update `BACKEND/README.md` with details on email verification setup and process.
+  - [ ] Notify QA for test scenario development around email verification and registration flows.
+  - [ ] Conduct a stakeholder review to ensure alignment with the acceptance criteria.
+  - [ ] Review and update architecture documents to reflect new email verification process.
