@@ -1,0 +1,6 @@
+- [ ] Update `app/src/application/userService.js`: Implement bcrypt hashing for password storage.
+- [ ] Modify `app/tests/register.test.js` and `app/tests/userService.test.js`: Update tests to cover new password hashing logic.
+- [ ] Review and update `app/src/domain/entities/user.js` to ensure password hashing is abstracted while user entities are created.
+- [ ] Develop database migration script if necessary, to transform existing passwords to hashed forms.
+- [ ] Conduct security audit of changes to ensure all passwords are secure and no plaintext passwords are exposed in logs or storage.
+- [ ] Update documentation to reflect changes in password storage strategy and compliance with best practices.
