@@ -32,7 +32,7 @@ describe('User Registration Tests', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
-  
+
   test('Should hash the password using bcrypt before saving', async () => {
     await userService.register(userData);
     
@@ -68,5 +68,43 @@ describe('User Registration Tests', () => {
       .toThrow('Invalid email format.');
   });
 
+});
+
+describe('UserService Login Tests', () => {
+  let loginData;
+
+  beforeEach(() => {
+    loginData = {
+      email: 'test@example.com',
+      password: 'Password123!'
+    };
+    db.query.mockResolvedValue({
+      rows: [
+        {
+          id: 'uuid-test',
+          password_hash: 'hashedPassword'
+        }
+      ]
+    });
+    bcrypt.compare.mockResolvedValue(true);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('Should validate the password using bcrypt during login', async () => {
+    await userService.login(loginData.email, loginData.password);
+    
+    expect(bcrypt.compare).toHaveBeenCalledWith(loginData.password, 'hashedPassword');
+  });
+
+  test('Should throw an error if bcrypt comparison fails', async () => {
+    bcrypt.compare.mockResolvedValueOnce(false);
+    
+    await expect(userService.login(loginData.email, loginData.password))
+      .rejects
+      .toThrow('Invalid credentials.');
+  });
 });
 ```
