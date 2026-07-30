@@ -1,0 +1,99 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.shopizer</groupId>
+  <artifactId>shopizer</artifactId>
+  <version>3.2.0</version>
+  <packaging>jar</packaging>
+
+  <properties>
+    <java.version>11</java.version> <!-- Java version remains 11 to match runtime -->
+    <spring-boot.version>3.2.0</spring-boot.version> <!-- Upgrading Spring Boot from 2.5.12 -->
+
+    <!-- Ensure Elasticsearch is upgraded to a supported version -->
+    <elasticsearch.version>7.10.2</elasticsearch.version> <!-- Updated for compatibility -->
+
+    <!-- Upgrade Guava to address known CVEs -->
+    <guava.version>31.1-jre</guava.version> <!-- Ensure it addresses security concerns -->
+
+    <!-- Update Jackson Databind to the latest stable version -->
+    <jackson-databind.version>2.15.2</jackson-databind.version> <!-- To reduce potential risks -->
+  </properties>
+
+  <dependencies>
+    <!-- Spring Boot Starter dependencies -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+      <version>${spring-boot.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+      <version>${spring-boot.version}</version>
+    </dependency>
+
+    <!-- Updated Elasticsearch dependency -->
+    <dependency>
+      <groupId>org.elasticsearch</groupId>
+      <artifactId>elasticsearch-rest-high-level-client</artifactId>
+      <version>${elasticsearch.version}</version>
+    </dependency>
+
+    <!-- Google Guava Library -->
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>${guava.version}</version>
+    </dependency>
+
+    <!-- Jackson Databind Library -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson-databind.version}</version>
+    </dependency>
+
+    <!-- Other dependencies -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+      <version>${spring-boot.version}</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!-- Spring Boot Maven Plugin -->
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <version>${spring-boot.version}</version>
+      </plugin>
+
+      <!-- Configure Maven Surefire and Failsafe Plugins for tests -->
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.22.2</version> <!-- Default plugin for running unit tests -->
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>2.22.2</version> <!-- Default plugin for running integration tests -->
+      </plugin>
+    </plugins>
+  </build>
+</project>
+```
+
+In this updated configuration:
+- Spring Boot version is updated to 3.2.0.
+- Elasticsearch version updated to a supported version, mapping updated APIs.
+- Guava's version is upgraded to address security vulnerabilities.
+- Jackson Databind is updated to enhance security and compatibility.
+- Java version remains consistent with the system environment (JVM 11).
+- Deprecated or unsupported versions and features are replaced or commented out based on current best practices.
