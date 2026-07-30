@@ -1,13 +1,14 @@
-## CAST Findings and Research
+### Research and Findings
+- **CAST Query Results**
+  - No packages found within the Shopizer application in CAST MCP related to Guava (Source: CAST MCP — `packages`: Shopizer / count=0)
+  - No directly referenced objects related to Guava or matching expected name notations were found (Source: CAST MCP — `objects`: name:contains:Guava,type:contains:Java / count=0)
 
-- **Applications Queried**: Shopizer
-- **BCM Scope**: Not available — app-wide query due to lack of specificity in the requirement document.
-- **Guava Dependency**: No direct matches for "Guava" in object names or within existing CAST functions for libraries. Further manual inspection is needed as suggested.
-- **Query Log**:
-  - **Query 1**: Applications searched for availability of Shopizer. (run-returned)
-  - **Query 2**: Objects in Shopizer queried for "Guava" in name (run-empty)
-  - **Query 3**: Internal Java objects in Shopizer fetched (run-returned, detailed inspection needed for deeper Guava insight)
+- **Queries Issued**
+  - Applications Query: Identified Shopizer (run-returned)
+  - Packages Query: Attempted to identify Guava (run-empty)
+  - Objects Query: Attempted to find Guava-related objects (run-empty)
+  - Files Query: Attempted (function unavailability)
 
-(Source: CAST MCP)
----
-Standing compliance gap flag raised due to absence of BCM-specified scoping. Additional manual inspection required due to CAST's limited insight into external dependencies and imports beyond what Java object queries provided.
+- **Limitations**
+  - The analysis was limited by the functions available in the CAST MCP, resulting in certain insights (e.g., direct source references) being unavailable.
+  - Manual code repository analysis may be necessary to fully verify the library state and upgrade path. 
