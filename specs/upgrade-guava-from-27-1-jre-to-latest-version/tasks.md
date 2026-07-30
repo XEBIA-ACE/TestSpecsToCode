@@ -1,13 +1,15 @@
-## Actionable Tasks
+### Tasks
+1. **Verify Current Guava Version**:
+   - Manually examine Maven `pom.xml` or Gradle `build.gradle` for current Guava version.
+   
+2. **Assess Code Dependencies**: 
+   - Identify parts of the application dependent on Guava.
+   
+3. **Upgrade Dependencies**:
+   - Modify the dependencies list in build configuration files to the latest Guava version.
 
-1. **Task 1**: Manually review the Shopizer application codebase to locate all mentions of Guava in the source files.
-   - File Types: Java source files, build configurations (POM.xml or build.gradle).
-   - Focus Areas: Import statements, dependency sections.
+4. **Perform Regression Testing**:
+   - Run existing test suites to ensure functionality remains intact.
 
-2. **Task 2**: Update Guava to the latest version in the relevant build files once located.
-
-3. **Task 3**: Run all existing tests to ensure compatibility with the new Guava version.
-
-4. **Task 4**: Deploy the changes to a test environment to evaluate application stability and gather user feedback.
-
-5. **Task 5**: Document any changes made to facilitate future upgrades and maintenance.
+5. **Deploy Updated Application**:
+   - Follow usual deployment protocols to update live environments.
