@@ -1,0 +1,77 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.shopizer</groupId>
+    <artifactId>shopizer</artifactId>
+    <version>1.0.0</version>
+
+    <properties>
+        <java.version>11</java.version>
+        <spring.boot.version>3.2.0</spring.boot.version>
+        <elasticsearch.version>7.17.9</elasticsearch.version> <!-- Update to a supported Elasticsearch version -->
+        <guava.version>31.1-jre</guava.version> <!-- Upgrade Guava to address known CVEs -->
+        <jackson.databind.version>2.14.0</jackson.databind.version> <!-- Ensure Jackson Databind is updated to the latest stable version -->
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <!-- Spring Boot Starter Parent -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-parent</artifactId>
+            <version>${spring.boot.version}</version>
+            <scope>import</scope>
+            <type>pom</type>
+        </dependency>
+
+        <!-- Elasticsearch -->
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-high-level-client</artifactId>
+            <version>${elasticsearch.version}</version>
+        </dependency>
+
+        <!-- Jackson Databind -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.databind.version}</version>
+        </dependency>
+
+        <!-- Guava -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
+        </dependency>
+
+        <!-- Other related dependencies can follow here -->
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Spring Boot Maven Plugin -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
+            <!-- Maven Compiler Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                </configuration>
+            </plugin>
+
+            <!-- Docker and Container Tools -->
+            <!-- Assuming this is required for containerization -->
+        </plugins>
+    </build>
+</project>

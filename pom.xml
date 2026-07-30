@@ -1,0 +1,64 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.shopizer</groupId>
+    <artifactId>shopizer</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <java.version>11</java.version>
+        <spring-boot.version>3.2.0</spring-boot.version>
+        <jackson-databind.version>2.15.2</jackson-databind.version> <!-- Updated to the latest version -->
+    </properties>
+
+    <dependencies>
+        <!-- Spring Boot Starter dependencies -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <version>${spring-boot.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <version>${spring-boot.version}</version>
+        </dependency>
+
+        <!-- Jackson Databind -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson-databind.version}</version>
+        </dependency>
+
+        <!-- Elasticsearch dependency -->
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-high-level-client</artifactId>
+            <version>7.17.6</version> <!-- Ensure compatibility with upgraded dependencies -->
+        </dependency>
+
+        <!-- Guava -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>31.1-jre</version> <!-- Version addressing known CVEs -->
+        </dependency>
+
+        <!-- Additional dependencies... -->
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot.version}</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>
