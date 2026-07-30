@@ -1,18 +1,9 @@
-# Constitution
+### Design and Quality Principles
 
-This section describes the quality standards and coding practices that need to be adhered to while upgrading the Jackson Databind library.
+- **Backward Compatibility:** Ensure changes do not disrupt existing functionality and maintain backward compatibility where possible.
 
-## Code Quality
-- Follow the organization's code style guidelines for Java.
-- Ensure all new or modified code is covered by unit tests.
-- Conduct peer reviews for any code adjustments related to the library upgrade.
+- **Test Coverage:** Maintain high test coverage to validate behavior post-upgrade, addressing both positive and negative test scenarios.
 
-## Security and Compliance
-- Validate that the new Jackson version addresses any known vulnerabilities.
-- Ensure compliance with internal security policies and external regulations.
+- **Documentation:** Ensure all changes are well-documented, including the rationale for updating and potential impact points identified during testing.
 
-## Testing Coverage
-- Maintain and enhance test coverage related to JSON processing and HTTP message conversion functionalities.
-
-## Documentation
-- Update system documentation to reflect the changes in the library version as well as any new patterns or practices adopted due to the update.
+- **Compliance Gap Handling:** Address the gap in BCM-compliance following policy GR-08; subsequent actions should reflect this oversight with added checks for future compliance.
