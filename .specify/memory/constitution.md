@@ -1,45 +1,62 @@
-# Constitution — US-001: View Account Information from Dashboard
+# Constitution: Java 11 → 17 Upgrade
 
-## Quality Principles
+## Project Identity
 
-### Performance Standards
-- Page load time must not exceed 1 second (P95) under normal load conditions
-- API response time for account information endpoint must be ≤ 500ms
-- Database queries must complete within 100ms; use connection pooling
-- Implement caching headers where appropriate to reduce redundant requests
+**Name:** Java 11 to 17 Upgrade  
+**Purpose:** Migrate all code and systems running Java 11 to Java 17.  
+**High-level Goal:** Ensure the application stack operates on Java 17 to address medium-term upgrade urgency and minimize tech debt associated with end-of-life Java versions.
 
-### Security Requirements
-- All data transmission must occur exclusively over HTTPS (TLS 1.2+)
-- Session validation must occur before any user data is retrieved or displayed
-- JWT tokens must be validated for expiry, signature, and issuer before granting access
-- Audit logs must not contain sensitive PII beyond user ID; no passwords or tokens in logs
-- Implement rate limiting on the account information endpoint to prevent enumeration attacks
+---
 
-### Accessibility Standards (WCAG 2.1 Level AA)
-- Color contrast ratio must be at least 4.5:1 for normal text, 3:1 for large text
-- All interactive elements must be keyboard navigable with visible focus indicators
-- Screen reader support: proper ARIA labels, landmarks, and live regions
-- Form fields and data displays must have associated labels
-- No content should rely solely on color to convey information
+## Guiding Principles
 
-### Coding Standards
-- Follow existing hexagonal architecture patterns (ports/adapters)
-- Use strict mode ('use strict') in all JavaScript files
-- JSDoc comments required for all public functions and classes
-- Error handling must use domain-specific error classes from `domainErrors.js`
-- All new code must have corresponding unit tests with ≥80% coverage
-- Use async/await consistently; avoid callback patterns
-- Validate all inputs at the HTTP adapter layer using express-validator
+1. **Prefer supported runtimes over legacy ones because of EOL risk.**
+2. **Prefer minimizing disruption to existing functionality over introducing new features because the primary concern is compatibility during the upgrade.**
+3. **Prefer automated testing over manual verification because Java runtime changes can introduce subtle regressions.**
 
-### Architecture Guardrails
-- Read-only operations must not modify user state
-- Audit logging must be non-blocking (fire-and-forget with error logging)
-- Session/authentication middleware must be reusable across routes
-- Database access only through repository pattern (PostgresUserRepository)
-- Configuration values must come from `config/env.js`, never direct `process.env` access
+---
 
-### Non-Functional Requirements
-- Audit log entries must include: timestamp (ISO 8601), user ID, action type, and IP address
-- System must gracefully handle database connection failures with appropriate error messages
-- Logging must use structured format via Winston logger
-- HTTP responses must include appropriate cache-control headers for security (no-store for sensitive data)
+## Constraints
+
+- **Timeline and Effort Ceiling:**  
+  N/A — not applicable to this task (Upgrade option person-day estimate not provided.)
+
+- **Technology Mandates:**  
+  - Target runtime: Java 17  
+  - Source runtime (current state): Java 11  
+  - All components must be upgraded to use Java 17 in non-development and production environments.
+
+- **Cloud Provider:**  
+  N/A — not applicable to this task.
+
+- **Compliance Requirements:**  
+  N/A — not applicable to this task.
+
+- **Budget or Scope Freezes:**  
+  N/A — not applicable to this task (upgrade option does not specify budget or scope caps).
+
+---
+
+## Quality Standards
+
+- **Testing Coverage Floor:**  
+  All critical user flows and system integration points impacted by the Java runtime must have automated regression tests in place.
+
+- **Code-Review Requirements:**  
+  All code or configuration changes required for Java 17 compatibility must be peer-reviewed (minimum: 1 reviewer not the author).
+
+- **Documentation Must-Haves:**  
+  Upgrade summary and required changes documented in project README or a dedicated UPGRADE.md.
+
+- **Deployment Gates:**  
+  Java 17 runtime must be present and validated in staging before release to production.
+
+---
+
+## Decision Log
+
+| ID  | Decision                                  | Rationale                                           | Status   |
+|-----|-------------------------------------------|-----------------------------------------------------|----------|
+| 1   | Adopt Java 17 as new runtime (from 11)    | Addresses tech debt and reduces EOL risk            | Accepted |
+
+---

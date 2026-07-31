@@ -1,0 +1,110 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.example</groupId>
+  <artifactId>myproject</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.3.0</version> <!-- Upgraded to Spring Boot 3.3.0 -->
+    <relativePath/> <!-- lookup parent from repository -->
+  </parent>
+
+  <properties>
+    <!-- Set Java source and target compatibility to 17 for upgrade -->
+    <java.version>17</java.version> <!-- Upgraded from 11 to 17 for Java 17 compatibility -->
+    <maven.compiler.source>17</maven.compiler.source> <!-- Upgraded from 11 to 17 -->
+    <maven.compiler.target>17</maven.compiler.target> <!-- Upgraded from 11 to 17 -->
+    <springdoc.version>2.5.0</springdoc.version> <!-- Added springdoc-openapi for Spring Boot 3 compatibility -->
+    <!-- Remove 'springfox' properties if present, as it's incompatible with Spring Boot 3 -->
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <!-- Modern Swagger integration with springdoc-openapi for SB 3.x -->
+    <dependency>
+      <groupId>org.springdoc</groupId>
+      <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+      <version>${springdoc.version}</version>
+    </dependency>
+    <!-- Replace deprecated or vulnerable dependencies -->
+    <!-- Remove commons-fileupload and commons-collections if not needed, or upgrade them below -->
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.15.0</version> <!-- Ensure this is compatible, update if necessary -->
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>32.1.3-jre</version> <!-- Upgraded Guava to a secure version -->
+    </dependency>
+    <dependency>
+      <groupId>commons-collections</groupId>
+      <artifactId>commons-collections</artifactId>
+      <version>3.2.2</version> <!-- Upgraded to latest 3.x for security -->
+    </dependency>
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-api</artifactId>
+      <version>0.12.5</version> <!-- Upgraded jjwt version -->
+    </dependency>
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-impl</artifactId>
+      <version>0.12.5</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-jackson</artifactId>
+      <version>0.12.5</version>
+      <scope>runtime</scope>
+    </dependency>
+    <!-- Upgraded Elasticsearch client for SB 3.x and Java 17 compatibility -->
+    <dependency>
+      <groupId>co.elastic.clients</groupId>
+      <artifactId>elasticsearch-java</artifactId>
+      <version>8.13.4</version>
+    </dependency>
+    <!-- Upgraded Infinispan to secure, maintained version compatible with Java 17 -->
+    <dependency>
+      <groupId>org.infinispan</groupId>
+      <artifactId>infinispan-core</artifactId>
+      <version>14.0.23.Final</version>
+    </dependency>
+    <!-- Add other project dependencies below as required -->
+    <!-- ... -->
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!-- Use Maven Compiler Plugin with Java 17 settings -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.11.0</version>
+        <configuration>
+          <source>${maven.compiler.source}</source> <!-- Set to 17 -->
+          <target>${maven.compiler.target}</target> <!-- Set to 17 -->
+          <release>17</release> <!-- Explicitly use Java 17 class file version -->
+        </configuration>
+      </plugin>
+      <!-- Ensure Spring Boot Maven plugin is present and up to date -->
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+      <!-- Other build plugins as needed -->
+    </plugins>
+  </build>
+</project>
