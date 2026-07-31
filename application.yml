@@ -1,0 +1,145 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.example</groupId>
+    <artifactId>modernized-app</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <java.version>11</java.version>
+        <!-- Upgraded Spring Boot version matching 3.x migration -->
+        <spring-boot.version>3.2.6</spring-boot.version>
+        <!-- Guava upgraded to the latest secure version -->
+        <guava.version>33.2.0-jre</guava.version>
+        <!-- MapStruct upgraded to a Spring Boot 3+ compatible version -->
+        <mapstruct.version>1.5.5.Final</mapstruct.version>
+        <!-- Infinispan upgraded to latest maintained release for Spring Boot 3 -->
+        <infinispan.version>14.0.23.Final</infinispan.version>
+        <!-- Elasticsearch client upgraded for Spring Boot 3+ support -->
+        <elasticsearch.client.version>8.12.2</elasticsearch.client.version>
+        <!-- Springdoc OpenAPI for Spring Boot 3+ compatibility -->
+        <springdoc-openapi.version>2.5.0</springdoc-openapi.version>
+        <!-- Surefire version for improved test coverage (JUnit 5 support) -->
+        <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
+        <!-- SpotBugs or code scanning plugin for SAST in CI -->
+        <spotbugs-maven-plugin.version>4.8.3.0</spotbugs-maven-plugin.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <!-- All Spring Boot dependencies aligned to 3.2.6 and migrated to jakarta.* namespace -->
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <!-- Secure, maintained version of Guava -->
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Secure, maintained version of MapStruct -->
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>${mapstruct.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Secure, maintained version of Infinispan (core API) -->
+            <groupId>org.infinispan</groupId>
+            <artifactId>infinispan-core</artifactId>
+            <version>${infinispan.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Secure, maintained version of Elasticsearch Java client -->
+            <groupId>co.elastic.clients</groupId>
+            <artifactId>elasticsearch-java</artifactId>
+            <version>${elasticsearch.client.version}</version>
+        </dependency>
+        <!--
+          Springfox was removed as it is not compatible with Spring Boot 3.x
+          and is deprecated/vulnerable.
+          Replacement: springdoc-openapi.
+        -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>${springdoc-openapi.version}</version>
+        </dependency>
+        <!-- Test dependencies (JUnit 5 & Spring Boot test) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Remove; commons-collections & commons-fileupload deprecated/vulnerable.
+             Use safe, maintained alternatives if needed elsewhere in code. -->
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <!-- Spring Boot Maven plugin for packaging and running -->
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <!-- Upgraded Maven Surefire Plugin for JUnit 5 and enhanced coverage -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
+            </plugin>
+            <plugin>
+                <!-- SpotBugs plugin for SAST/code scanning in CI pipeline -->
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>${spotbugs-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <!--
+       NOTES:
+       - Spring Boot 3.x uses the jakarta.* namespace; ensure codebase has migrated.
+       - Remove Springfox Swagger dependencies, replaced with springdoc-openapi.
+       - Manually review code for deprecated commons-* usage.
+       - Ensure all tests run via upgraded Surefire/JUnit 5.
+       - SAST/SpotBugs scanning enabled for CI.
+    -->
+</project>
