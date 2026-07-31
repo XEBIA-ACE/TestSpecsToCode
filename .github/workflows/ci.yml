@@ -1,0 +1,128 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          # Optional: install linting tools if specified in separate requirements
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+
+      - name: Run lint
+        run: |
+          if command -v flake8 >/dev/null 2>&1; then
+            flake8 .
+          elif command -v pylint >/dev/null 2>&1; then
+            pylint $(git ls-files '*.py')
+          else
+            echo "No linter (flake8/pylint) installed; skipping lint step."
+          fi
+
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    env:
+      FLASK_ENV: testing
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+
+      - name: Run unit tests (pytest if available, else unittest)
+        run: |
+          if python -m pytest --version >/dev/null 2>&1; then
+            python -m pytest -vv
+          else
+            python -m unittest discover -v
+
+  build:
+    name: Build Package
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install build
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Build distribution artifacts
+        run: |
+          python -m build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-artifacts
+          path: dist/
+
+  sast:
+    name: SAST Security Scan
+    runs-on: ubuntu-latest
+    needs: test
+    if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install security scanning tools
+        run: |
+          python -m pip install --upgrade pip
+          # Install bandit if present in dev requirements; otherwise attempt direct install
+          if [ -f requirements-dev.txt ]; then
+            pip install -r requirements-dev.txt || true
+          fi
+          if ! command -v bandit >/dev/null 2>&1; then
+            pip install bandit || true
+          fi
+
+      - name: Run Bandit SAST scan
+        run: |
+          if command -v bandit >/dev/null 2>&1; then
+            bandit -r . || true
+          else
+            echo "Bandit not available; skipping SAST scan."
+          fi
