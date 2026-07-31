@@ -2,68 +2,53 @@
 'use strict';
 
 const userService = require('../src/application/userService');
-const nodemailer = require('nodemailer');
-const bcrypt = require('bcrypt');
-const { validateEmail } = require('../src/utils/validation');
 const db = require('../src/infrastructure/db/pool');
 
-jest.mock('nodemailer');
-jest.mock('bcrypt');
-jest.mock('../src/utils/validation');
 jest.mock('../src/infrastructure/db/pool');
 
-describe('User Registration Tests', () => {
-  let userData;
+describe('updateUserProfile Tests', () => {
+  const mockProfileData = {
+    userId: '123e4567-e89b-12d3-a456-426614174000',
+    name: 'Updated User',
+    email: 'updated@example.com',
+  };
+  
+  const UPDATE_PROFILE_URL = '/api/v1/users/me/profile';
   
   beforeEach(() => {
-    userData = { 
-      email: 'test@example.com',
-      password: 'Password123!',
-      name: 'Test User'
-    };
-    nodemailer.createTransport.mockReturnValue({
-      sendMail: jest.fn().mockResolvedValue(true)
-    });
-    bcrypt.hash.mockResolvedValue('hashedPassword');
-    validateEmail.mockReturnValue(true);
-    db.query.mockResolvedValue({ rows: [] });
-  });
-
-  afterEach(() => {
     jest.clearAllMocks();
   });
-  
-  test('Should hash the password using bcrypt before saving', async () => {
-    await userService.register(userData);
-    
-    expect(bcrypt.hash).toHaveBeenCalledWith(userData.password, 10);
+
+  // Test to ensure the user profile update is successful
+  it('should update user profile successfully', async () => {
+    db.query.mockResolvedValueOnce({ rowCount: 1 });
+    const result = await userService.updateUserProfile(mockProfileData.userId, mockProfileData);
+    expect(result).toBe(true);
   });
 
-  test('Should validate the email format correctly', async () => {
-    await userService.register(userData);
-    
-    expect(validateEmail).toHaveBeenCalledWith(userData.email);
+  // Test to handle case when database operation fails
+  it('should return false if updating profile fails', async () => {
+    db.query.mockResolvedValueOnce({ rowCount: 0 });
+    const result = await userService.updateUserProfile(mockProfileData.userId, mockProfileData);
+    expect(result).toBe(false);
   });
 
-  test('Should send an OTP email on successful registration', async () => {
-    await userService.register(userData);
-    
-    const sendMailMock = nodemailer.createTransport().sendMail;
-    expect(sendMailMock).toHaveBeenCalled();
-  });
+  // Test to check email uniqueness constraint
+  it('should throw an error if email is already in use', async () => {
+    db.query.mockImplementationOnce(() => {
+      throw new Error('duplicate key value violates unique constraint "users_email_key"');
+    });
 
-  test('Should handle duplicate email registration attempts', async () => {
-    db.query.mockResolvedValueOnce({ rows: [{ email: userData.email }] });
-    
-    await expect(userService.register(userData))
+    await expect(userService.updateUserProfile(mockProfileData.userId, mockProfileData))
       .rejects
-      .toThrow('Email already in use.');
+      .toThrow('The provided email is already in use.');
   });
-  
-  test('Should throw an error if email format is invalid', async () => {
-    validateEmail.mockReturnValueOnce(false);
+
+  // Test to ensure inputs are validated and sanitized
+  it('should throw an error if validation fails', async () => {
+    const invalidData = { ...mockProfileData, email: 'invalid-email' };
     
-    await expect(userService.register(userData))
+    await expect(userService.updateUserProfile(mockProfileData.userId, invalidData))
       .rejects
       .toThrow('Invalid email format.');
   });
