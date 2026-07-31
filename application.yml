@@ -1,0 +1,189 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.shopizer</groupId>
+    <artifactId>shopizer</artifactId>
+    <version>3.2.5</version>
+    <packaging>jar</packaging>
+    <name>Shopizer</name>
+    <description>Shopizer Spring Boot 3.2.6 upgrade template</description>
+
+    <properties>
+        <!-- Upgrade: Set Spring Boot version to 3.2.6 -->
+        <spring-boot.version>3.2.6</spring-boot.version>
+        <!-- Upgrade: Set Java source/target version to 17. Spring Boot 3.x requires Java 17+. -->
+        <java.version>17</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <!-- Upgrade: Set Spring Framework version to 6.1.7 -->
+        <spring-framework.version>6.1.7</spring-framework.version>
+        <!-- Upgrade: Set Springfox Swagger 3.0.0 for OpenAPI/Swagger documentation -->
+        <springfox.version>3.0.0</springfox.version>
+        <!-- Upgrade: Update Jackson to latest version compatible with Spring Boot 3.2.6 -->
+        <jackson.version>2.15.4</jackson.version>
+        <!-- Upgrade: Update Guava to latest version with no known CVEs -->
+        <guava.version>32.1.3-jre</guava.version>
+        <!-- Upgrade: Update commons-collections to latest version with no known CVEs -->
+        <commons-collections.version>3.2.2</commons-collections.version>
+        <!-- Upgrade: Update JJWT to latest version with CVE fixes -->
+        <jjwt.version>0.11.5</jjwt.version>
+        <!-- Upgrade: Update Infinispan to latest stable version for Java 17+ -->
+        <infinispan.version>14.0.23.Final</infinispan.version>
+        <!-- Upgrade: Update Elasticsearch client to latest 7.x compatible with Spring Boot 3.x -->
+        <elasticsearch.version>7.17.17</elasticsearch.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Upgrade: Import Spring Boot dependencies BOM for 3.2.6 -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- Upgrade: Use Spring Boot Starter with updated version -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <!-- Upgrade: Update Spring Web Starter for REST API -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        
+        <!-- Upgrade: Include Spring Boot Actuator for health and readiness probes -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        
+        <!-- Upgrade: Include Spring Framework 6.1.7 explicitly if needed (Spring Boot 3.2.6 already inherits this) -->
+        <!--
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring-framework.version}</version>
+        </dependency>
+        -->
+
+        <!-- Upgrade: Update Jackson version to address CVEs -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
+        <!-- Upgrade: Swagger/OpenAPI documentation updated from Springfox 2.9.2 to 3.0.0 -->
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-boot-starter</artifactId>
+            <version>${springfox.version}</version>
+        </dependency>
+
+        <!-- Upgrade: Update guava library -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
+        </dependency>
+
+        <!-- Upgrade: Update commons-collections library to address CVEs -->
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>${commons-collections.version}</version>
+        </dependency>
+
+        <!-- Upgrade: Update JJWT library version -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>${jjwt.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Upgrade: Update Infinispan version -->
+        <dependency>
+            <groupId>org.infinispan</groupId>
+            <artifactId>infinispan-core</artifactId>
+            <version>${infinispan.version}</version>
+        </dependency>
+        
+        <!-- Upgrade: Update Elasticsearch client version -->
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-high-level-client</artifactId>
+            <version>${elasticsearch.version}</version>
+        </dependency>
+
+        <!-- Test dependencies updated for Java 17+ and Spring Boot 3.x -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Upgrade: Use Spring Boot Maven Plugin compatible with Spring Boot 3.2.6/Java 17 -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot.version}</version>
+                <configuration>
+                    <!-- Ensure compatibility with layered jars for container building -->
+                    <layers enabled="true"/>
+                </configuration>
+            </plugin>
+            <!-- Upgrade: Ensure Maven Compiler Plugin matches Java 17 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <release>${java.version}</release>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <!-- Upgrade: Externalized config defaults for container/cloud-native (for k8s/actuator readiness) -->
+    <profiles>
+        <profile>
+            <id>cloud-native</id>
+            <properties>
+                <!-- Spring Config location defaults to /config /opt/app/config etc for containers -->
+                <spring.config.additional-location>/config/,/opt/app/config/</spring.config.additional-location>
+                <!-- Enable health and readiness endpoints -->
+                <management.endpoint.health.show-details>always</management.endpoint.health.show-details>
+                <management.endpoints.web.exposure.include>health,info,readiness</management.endpoints.web.exposure.include>
+                <!-- Spring Boot readiness/liveness probes -->
+                <management.endpoint.readiness.enabled>true</management.endpoint.readiness.enabled>
+                <management.endpoint.liveness.enabled>true</management.endpoint.liveness.enabled>
+            </properties>
+        </profile>
+    </profiles>
+</project>
