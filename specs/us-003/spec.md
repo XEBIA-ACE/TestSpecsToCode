@@ -1,16 +1,26 @@
-# Profile Update Specification
+## Specification Document
 
-## User Story
-As a user, I want to update my profile information so that I can keep my data current and accurate.
+### Historical Currency Rates Lookup
 
-## Acceptance Criteria
-1. Given a user is logged in, when they update their profile information, then the changes are saved immediately.
-2. Given a user modifies their profile, when they click save, then the updated information reflects immediately on their profile page.
-3. Given a user submits profile changes, when the changes are saved, then they are securely stored without unauthorized access.
+- **Purpose:** Enable users to look up and retrieve historical currency rates from the transaction history page to support analytical purposes.
+- **Scope:** The feature should seamlessly integrate with the existing transaction history interface to allow users to efficiently access historical currency data. 
 
-## Out-of-Scope Items
-- Modifications to authentication processes are not included.
-- Enhancements to profile UI/UX design for accessibility.
+### Code Structure
+- **Focus Symbol:** The function related to rates was expected to be identified, but none was found under the criteria set.
 
-## Cross-Service Dependencies
-- Ensures integration with existing user authentication and session management services.
+### Existing Implementation
+- **Current Code Insights:**
+  - Symbol explored: Rates (none found)
+  - Kind: Function
+  - Expected transactions: 0 found
+
+### Requirements to be Developed
+- Introduce a function to retrieve and display historical currency rates.
+- Ensure integration with transaction history page UI.
+- Conduct tests to verify data accuracy and interface integration.
+
+### Challenges
+- Lack of existing symbols for Rates function requires groundwork to link UI with backend data sources.
+
+### Conclusion
+The enhancement will fundamentally depend on first creating a mechanism to associate UI elements with the data layer effectively.

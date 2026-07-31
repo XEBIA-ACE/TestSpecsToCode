@@ -1,7 +1,7 @@
-## Profile Update Quality Principles and Expectations
+### Non-functional Requirements and Constraints
 
-- **Security Compliance:** Ensure all profile data modifications are stored securely without unauthorized access. Follow OWASP guidelines for data protection and user authentication.
-- **Usability Standards:** Implement immediate feedback mechanisms after user updates their profile to maintain a seamless user experience.
-- **Performance Optimization:** Profile updates should be reflected immediately; aim for a backend response time of less than 300ms.
-- **Code Quality:** Follow existing coding standards within the repository. Ensure code readability and maintainability with appropriate comments and documentation.
-- **Testing Requirements:** Unit and integration tests must cover all acceptance criteria. Achieve minimum 90% coverage on new code.
+- **Data Availability:** Historical rate data must be complete and accurate for all currencies involved.
+- **Performance:** The lookup mechanism should not significantly impact user experience or page load times.
+- **Scalability:** The system must handle increased queries if transaction volume increases.
+- **Security:** Ensure any integrations with external services for currency data are secure and do not expose the system to vulnerabilities.
+- **Maintainability:** Code should be well-documented and designed for ease of future updates or integrations.

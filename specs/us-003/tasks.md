@@ -1,5 +1,14 @@
-- [ ] Create `updateUserProfile` function in `BACKEND/src/repositories/user.repository.ts`.
-- [ ] Add new POST endpoint in `BACKEND/src/routes/user-profile.routes.ts` for profile updates.
-- [ ] Update `FRONTEND/src/components/UserProfileForm.tsx` to handle save operations.
-- [ ] Implement unit tests for the `updateUserProfile` function in `app/tests/userService.test.js`.
-- [ ] Write integration tests to validate profile update API in `app/tests/accountInfo.test.js`.
+### Task Breakdown
+
+1. **Analysis Phase:**
+   - Task 1: Conduct further analysis around existing data sources for currency rates.
+   - Task 2: Examine database or service APIs to find historical currency data.
+
+2. **Development Phase:**
+   - Task 1: Define data retrieval pathways for historical currency rates.
+   - Task 2: Develop or enhance backend logic to facilitate currency rate retrieval.
+   - Task 3: Create/Update UI components to integrate the data into the transaction interface.
+
+3. **Testing Phase:**
+   - Task 1: Write tests for ensured data accuracy.
+   - Task 2: Perform manual testing of transaction history page with the new feature.
