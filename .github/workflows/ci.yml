@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - "*"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22.x, 24.x]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix['node-version'] }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix['node-version'] }}
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Set up TypeScript 5.4
+        run: npm install --save-dev typescript@5.4
+      - name: Lint
+        run: npm run lint
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22.x, 24.x]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix['node-version'] }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix['node-version'] }}
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Set up TypeScript 5.4
+        run: npm install --save-dev typescript@5.4
+      - name: Run Unit Tests
+        run: npm test
+
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22.x, 24.x]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix['node-version'] }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix['node-version'] }}
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Set up TypeScript 5.4
+        run: npm install --save-dev typescript@5.4
+      - name: Build
+        run: npm run build
+
+  sast:
+    name: SAST Security Scan (optional)
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Set up TypeScript 5.4
+        run: npm install --save-dev typescript@5.4
+      - name: Run SAST (npm audit)
+        run: npm audit --audit-level=high

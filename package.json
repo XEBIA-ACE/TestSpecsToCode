@@ -1,0 +1,21 @@
+{
+  "name": "project-scaffold",
+  "version": "1.0.0",
+  "description": "A generator and monorepo scaffolding tool.",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "dependencies": {
+    "yeoman-generator": "^5.0.0"
+  },
+  "devDependencies": {
+    "typescript": "5.4.0"
+  },
+  "engines": {
+    "node": ">=20 <26"
+  },
+  "license": "MIT"
+}
