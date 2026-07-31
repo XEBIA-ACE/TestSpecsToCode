@@ -1,0 +1,191 @@
+<!--
+  pom.xml for Spring Boot 3.2.6 and Spring Framework 6.1.x upgrade.
+  Generated as no original was detected.
+  Comments explain changes and default version upgrades required by this migration.
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.example</groupId>
+  <artifactId>sm-shop</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+
+  <packaging>jar</packaging>
+
+  <name>sm-shop</name>
+  <description>Spring Boot 3.2.6 and Spring Framework 6.1.x migrated Java REST API Application</description>
+
+  <properties>
+    <java.version>17</java.version> <!-- Upgraded minimum to 17 for Spring Boot 3.x compatibility -->
+    <maven.compiler.source>17</maven.compiler.source> <!-- Spring Boot 3.x requires Java 17+ -->
+    <maven.compiler.target>17</maven.compiler.target>
+    <spring-boot.version>3.2.6</spring-boot.version> <!-- Spring Boot version matching upgrade goal -->
+    <spring-framework.version>6.1.6</spring-framework.version> <!-- Explicit Spring Framework version -->
+    <springdoc-openapi.version>2.5.0</springdoc-openapi.version> <!-- Springfox replaced by springdoc-openapi -->
+    <jjwt.version>0.11.5</jjwt.version> <!-- Latest stable version for JJWT for token handling/security -->
+    <guava.version>33.0.0-jre</guava.version> <!-- Updated Guava to modern secure version -->
+    <jackson.version>2.17.1</jackson.version> <!-- Latest Jackson version for compatibility and security -->
+    <httpclient5.version>5.2.1</httpclient5.version> <!-- Apache HttpClient 5.x, current secure version -->
+    <commons-collections4.version>4.4</commons-collections4.version> <!-- Upgrade to address vulnerabilities -->
+    <commons-fileupload.version>1.5</commons-fileupload.version> <!-- Upgrade for vulnerability fixes -->
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${spring-boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <!-- Spring Boot Starter for Web (REST APIs) -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+    <!-- Spring Boot Starter for JPA (Data layer) -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+
+    <!-- Spring Boot Starter for Test (includes JUnit 5, Mockito, etc.) -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Explicit Spring Framework version set for core/mvc usage -->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+      <version>${spring-framework.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-webmvc</artifactId>
+      <version>${spring-framework.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-core</artifactId>
+      <version>${spring-framework.version}</version>
+    </dependency>
+
+    <!-- Replace Springfox with springdoc-openapi for Swagger/OpenAPI support -->
+    <dependency>
+      <groupId>org.springdoc</groupId>
+      <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+      <version>${springdoc-openapi.version}</version>
+    </dependency>
+    <!--
+      Springfox dependencies removed. springdoc-openapi provides OpenAPI 3 UI and API docs.
+      Springfox 2.x/3.x is not compatible with Spring Boot 3+/Spring Framework 6+.
+    -->
+
+    <!-- Jackson (JSON processor) explicitly set to latest version -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    
+    <!-- Guava upgraded for security/compatibility -->
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>${guava.version}</version>
+    </dependency>
+
+    <!-- Apache HttpClient 5, for client-side HTTP; replaces older 4.x family -->
+    <dependency>
+      <groupId>org.apache.httpcomponents.client5</groupId>
+      <artifactId>httpclient5</artifactId>
+      <version>${httpclient5.version}</version>
+    </dependency>
+
+    <!-- Secure, maintained commons-collections4 -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-collections4</artifactId>
+      <version>${commons-collections4.version}</version>
+    </dependency>
+    <!-- Secure, current commons-fileupload -->
+    <dependency>
+      <groupId>commons-fileupload</groupId>
+      <artifactId>commons-fileupload</artifactId>
+      <version>${commons-fileupload.version}</version>
+    </dependency>
+
+    <!-- JWT (security token) library, compatible with Spring Boot 3.x -->
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-api</artifactId>
+      <version>${jjwt.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-impl</artifactId>
+      <version>${jjwt.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-jackson</artifactId>
+      <version>${jjwt.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <!-- Ehcache/Hibernate can be added here (none in context/spec specified) -->
+
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!-- Spring Boot Maven Plugin required for executable JAR and container images -->
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <version>${spring-boot.version}</version>
+        <configuration>
+          <layers>
+            <enabled>true</enabled>
+          </layers>
+        </configuration>
+      </plugin>
+      <!-- Compiler Plugin to ensure Java 17 compliance -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.11.0</version>
+        <configuration>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <!-- No profiles needed for basic migration/upgrade context -->
+
+</project>
