@@ -1,0 +1,27 @@
+{
+  "name": "jhipster-upgrade-migration",
+  "version": "1.0.0",
+  "description": "Migration of JHipster-7.9.3 codebase to support TypeScript 5.4 and Node.js 22/24",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest"
+  },
+  "keywords": [
+    "jhipster",
+    "typescript",
+    "nodejs",
+    "migration"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "typescript": "5.4.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
