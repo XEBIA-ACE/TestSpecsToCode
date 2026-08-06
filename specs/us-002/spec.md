@@ -1,18 +1,13 @@
-# Profile Viewing
+## Profile Editing Functionality
 
-## User Story Narrative
-As a logged-in user, I want to view my profile details so that I can ensure my information is correct and update it if necessary.
+### Acceptance Criteria
+- Given a user is on their profile management page, When they update their name, email, or password and save the changes, Then those changes should reflect immediately.
+- Given a user updates their profile information, When the information is successfully changed, Then a confirmation message should be displayed.
 
-## Acceptance Criteria
-1. Given a user is logged in, when they navigate to their profile, then their profile details should be displayed accurately.
-2. Given a user views their profile, when they check the displayed details, then all personal information should reflect the latest data.
+### Definition of Done
+- Includes unit and integration tests
+- Meets performance benchmarks
+- Validated against acceptance criteria
 
-## Out of Scope
-- User profile editing through the same interface.
-- Profile picture uploads or image management.
-- Interactions with third-party services for profile information.
-
-## Cross-Service Dependencies
-- Requires the account service to provide up-to-date user data.
-- Relies on an authentication service to verify logged-in users.
-- May require integration with a cache layer to enhance data retrieval speed.
+### Structural insights
+- Transactions are present in the User_Management application but none are specifically tagged for profile editing based on the current CAST MCP configuration analysis.
