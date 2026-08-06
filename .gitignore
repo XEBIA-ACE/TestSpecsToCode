@@ -1,0 +1,15 @@
+# Ignore build files
+/build/
+
+# Ignore logs
+*.log
+
+# Ignore temp files
+*.temp
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore config files
+*.cfg

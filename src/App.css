@@ -1,0 +1,23 @@
+```css
+.currency-rate-display {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+
+.currency-rate-display h2 {
+  color: #333;
+}
+
+.currency-rate-display ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.currency-rate-display li {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  margin-bottom: 5px;
+  padding: 10px;
+  border-radius: 5px;
+}
+```

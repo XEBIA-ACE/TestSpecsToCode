@@ -1,32 +1,26 @@
----
-# Implementation Plan: Sign in with Connected SSO Account (US-001)
+## Planned Implementation
 
-## Architecture/Integration
+1. **Development of Currency Rate Fetching Service**
+   - Implement a new service to fetch real-time currency rates from an external API.
+   - Ensure data caching is implemented to reduce API calls and improve performance.
 
-- **Backend (TypeScript):**
-  - Add a new SSO login route to the existing `auth` router (`/api/v1/auth/sso` or similar) in `BACKEND/src/routes/auth.routes.ts`.
-  - Integrate OAuth 2.0 token validation, using a new SSO service module leveraging app-configured provider secrets and endpoints.
-  - Create/issue app JWT via existing session/token logic after external token validation and user resolution.
-  - Ensure error handling for all new SSO endpoints passes through centralized logic, remaining generic and non-revealing.
-  - Tests added for: successful SSO login flow, generic error flow, expiry, JWT compliance, regression of legacy login.
+2. **UI Integration**
+   - Update the existing transaction UI to display current currency rates.
+   - Ensure a user-friendly format for currency exchange rate information.
 
-- **Frontend (React):**
-  - Add SSO sign-in button to the login form—triggers redirect to the backend SSO endpoint or OAuth handshake popup.
-  - On successful callback, handle JWT/session and redirect to profile/home page; on failure, display only a generic failure state.
-  - No changes to existing email/mobile login flow.
+3. **Testing**
+   - Write unit tests to verify the accuracy of fetched currency rates.
+   - Develop integration tests to ensure data flows correctly from the service to the UI.
+   - Conduct UI tests to validate the display and interaction of currency rates.
 
-- **Configuration:**
-  - Extend centralized backend config to load OAuth provider secrets/IDs for enabled SSO providers.
-  - Add SSO enable/disable toggle to configuration (default off).
+4. **Deployment Preparation**
+   - Prepare deployment scripts and ensure seamless integration into the production environment.
+   - Schedule a deployment timeframe that minimizes user impact.
 
-## File/Class Impact per Repository
+5. **Monitoring and Quality Assurance**
+   - Set up monitoring to track the accuracy and performance of currency rate updates.
+   - Collect user feedback for continuous improvement.
 
-- **XEBIA-ACE/TestSpecsToCode.git**
-  - BACKEND/src/routes/auth.routes.ts: Add SSO login endpoint.
-  - BACKEND/src/services/sso.service.ts: New SSO OAuth token validation.
-  - BACKEND/src/config/auth.config.ts: Add SSO provider configuration.
-  - FRONTEND/src/app/App.tsx or login page: Add SSO button, handle SSO flow.
-  - BACKEND/tests: Add/extend tests for SSO success and failure flows.
-  - Update documentation/README if any new env vars are needed.
+## Risk Mitigation
 
----
+Given the lack of direct dependencies, introduce changes incrementally and validate with a shadow mode or controlled rollout to minimize risk.

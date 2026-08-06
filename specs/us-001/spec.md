@@ -1,49 +1,38 @@
----
-# Functional Specification: Sign in with a Connected SSO Account (US-001)
+# Specification Document for Real-time Currency Rate Display
 
-## Narrative & Scope
+## Overview
+This document outlines the requirement for implementing a real-time currency rate display feature in an existing transaction system. This new functionality will allow users to view real-time currency rates for over 50 currencies, crucial for facilitating informed financial decisions.
 
-As a Shopping App user with a previously-linked Single Sign-On (SSO) account, I want to securely log in to my account using OAuth 2.0 (SSO button), and receive a Shopping App JWT and session, so that I can access my profile and purchasing features without entering my app-specific password.
+## Technical Requirements
 
-This feature coexists with the legacy email/mobile + password login: both are available options. The system must validate the SSO provider token, verify user linkage, issue a session, and handle failures without exposing sensitive error details. SSO provider-specific configuration must be reused from the central authentication service.
+### Feature Enhancement
+- **Story**: Real-time Currency Rate Display
 
-## Acceptance Criteria
+### Acceptance Criteria
+- **Behavior**: The system must present live updates of currency rates.
+- **Success Metrics**: A visible display of real-time currency rates that updates dynamically as new data becomes available.
+- **Integration Points**: Must incorporate into existing transaction flows without disruption.
 
-1. **SSO-Linked Sign-in, Success:**
-   - GIVEN SSO is enabled and the user has a mapped SSO identity,
-   - WHEN SSO login is selected and authentication with the external provider succeeds,
-   - THEN the Shopping App must:
-     - Accept the provider's OAuth 2.0 token,
-     - Validate and link it to the internal user,
-     - Issue a JWT session as per Shopping App token policy,
-     - Redirect / respond with profile/home page.
+### Definition of Done
+- Fully functional integration of features.
+- Complete test coverage including unit, integration, and UI tests.
+- No critical or major bugs affecting production.
 
-2. **SSO-Linked Sign-in, Failure:**
-   - GIVEN SSO is enabled,
-   - WHEN authentication at the provider fails or is denied,
-   - THEN respond with a generic error message ("Authentication failed. Please try again.") and do not indicate any field-specific or provider-specific detail.
+## Associated Symbols (CI-GR confirmed)
 
-3. **Legacy Login Compatibility:**
-   - Legacy email/mobile + password logins must remain available and functional, with no UX or security regressions.
+Symbol | ID | Details
+--- | --- | ---
+Currency | 73115baba0881d7d | Variable in `sm-core-model/src/main/java/com/salesmanager/core/constants/SchemaConstant.java`.
+CurrencyService | c86909ecf6730a5b | Interface in `sm-core/src/main/java/com/salesmanager/core/business/services/reference/currency/CurrencyService.java`.
 
-4. **Session Token Compliance:**
-   - JWT issued must include all current app claims (user id, expiry, etc) and have session expiry/timing identical to non-SSO logins.
+## Impact Analysis
 
-5. **JWT Validation on API Requests:**
-   - After SSO sign-in, API endpoints must accept and validate the JWT as currently implemented for normal logins (until expiry).
+The measured blast radius based on current structural data:
+- **Assessed remediation priority**: **MEDIUM**
+- **Measured blast-radius count**: **0** 
 
-## Out-of-Scope
+The analysis has not identified any direct callers, transitive nodes, or downstream callees that would be affected by changes to the `Currency` variable or `CurrencyService` interface. The system exhibits a stable integration with no immediate dependencies impacting other components.
 
-- SSO account linking process (this feature assumes the user’s identity is already mapped from an onboarding or profile management flow).
-- Sign-up/registration via SSO (only sign-in is in-scope).
-- SSO provider choice/selector UI.
-- Mobile app-specific implementation (web only for MVP).
-- Migration of legacy accounts to SSO.
+## Planned Implementation
 
-## Cross-Service Dependencies
-
-- Requires valid configuration for external OAuth providers (Google, etc), stored in the centralized config mechanism.
-- Shopping App JWT/session creation must use current signing keys, expiry durations, and claim structures defined by the app.
-- User identity lookups are performed via existing user service/database logic.
-
----
+Implement the story by integrating the currency rate fetching module with UI components and existing transaction processing functions. The plan includes a new service layer supported by data-fetching APIs, ensuring minimal disruption to existing operations.
