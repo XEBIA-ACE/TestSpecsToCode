@@ -1,15 +1,22 @@
-# Ignore build files
-/build/
+```gitignore
+# Ignore build directories
+dist/
+
+# Ignore node modules
+node_modules/
+
+# Ignore local development environment settings
+.env.local
+.env.development
+.env.test.local
 
 # Ignore logs
+logs
 *.log
 
-# Ignore temp files
-*.temp
-
-# Ignore system files
+# MacOS
 .DS_Store
-Thumbs.db
 
-# Ignore config files
-*.cfg
+# Ignore production server sensitive info
+deploy/scripts/*.sh
+```

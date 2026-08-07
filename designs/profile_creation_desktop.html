@@ -1,0 +1,34 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Creation - Desktop</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="profile-creation-container">
+        <h2>Create Your Profile</h2>
+        <form id="profile-creation-form">
+            <div class="form-group">
+                <label for="fullname">Full Name</label>
+                <input type="text" id="fullname" name="fullname" required>
+                <div class="tooltip">Enter your full legal name.</div>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+                <div class="tooltip">Provide a valid email address for account verification.</div>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+                <div class="tooltip">Your password should be at least 8 characters long.</div>
+            </div>
+            <button type="submit">Create Profile</button>
+        </form>
+    </div>
+</body>
+</html>
+```
