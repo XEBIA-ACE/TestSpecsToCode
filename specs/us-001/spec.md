@@ -1,22 +1,18 @@
-### Profile Creation Interface
+## Specification Document: Currency Selection User Interface
 
-#### Overview
-The Profile Creation Interface enables new users to create their profiles seamlessly within the User Management application. The interface should be intuitive and responsive across all target devices, providing a user-friendly experience.
+### User Story Narrative
+The user interface component will enable users to choose from a list of available currencies. Upon selection, the application should display product prices in the selected currency, enhancing the user experience for international customers by providing price information in their preferred currency.
 
-#### Objectives
-- Design and implement a user-friendly interface for profile creation.
-- Ensure the interface is accessible and responsive across devices.
+### Acceptance Criteria
+- The component allows users to select from more than ten currencies.
+- The component updates the product prices to reflect the selected currency immediately.
+- The component integrates seamlessly into the existing UI without breaking current functionalities.
 
-#### Key Features
-1. **Responsive Design:** The UI must adapt seamlessly to different screen sizes, including mobile, tablet, and desktop.
-2. **Form Validation:** Implement robust validation to provide immediate feedback to the user on input errors.
-3. **Guided Prompts:** Incorporate user-guided prompts and tooltips to aid in data input.
+### Out-of-Scope
+- Currency conversion rates and their management are out of scope.
+- Backend currency-related operations and data storage.
+- Handling of user preferences or session storage related to selected currency.
 
-#### Technical Context
-- The Profile Creation interface links to various internal components identified in the application.
-- Components like `UserProfileService` and `UserProfileController` are significant to handling data operations related to profiles.
-
-#### External Libraries
-Multiple `@radix-ui/react` libraries detected, suggesting integration for UI components.
-
----
+### Cross-Service Dependencies
+- This story requires integration with any frontend service responsible for application state management.
+- Requires coordination with services handling price calculations and conversions.

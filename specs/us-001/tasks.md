@@ -1,26 +1,10 @@
-### Task Breakdown
-
-1. **Design Phase**
-   - Design UI mock-ups based on responsive and user-friendly principles.
-
-2. **Development Phase**
-   - Implement `UserProfileService` and `UserProfileController`.
-   - Integrate `createUserProfileRouter` for request handling.
-
-3. **Validation Implementation**
-   - Develop validation logic for profile fields.
-   - Integrate error handling mechanisms utilizing `ProfileErrorResponse`.
-
-4. **UI Components Integration**
-   - Implement UI components using `@radix-ui/react`.
-   - Ensure all components are fully responsive.
-
-5. **Testing and Debugging**
-   - Conduct comprehensive testing for functionality and responsiveness.
-   - Gather user feedback for UI improvements.
-
-6. **Documentation and Handover**
-   - Create user manuals and technical documents.
-   - Conduct handover sessions with support teams.
-
----
+- [ ] Design and document the currency selection component interface in `FRONTEND/src/`.
+- [ ] Implement the currency selection component in `FRONTEND/src/components/CurrencySelector.tsx`.
+- [ ] Update existing application state management to handle changes in currency selection in `FRONTEND/src/state/`.
+- [ ] Ensure the currency selection impacts the price display correctly after selection.
+- [ ] Develop unit tests for the component functionality in `FRONTEND/src/tests/CurrencySelector.test.tsx`.
+- [ ] Perform integration testing within the application context to ensure no existing functionality is broken.
+- [ ] Conduct a design review session with stakeholders to validate UI/UX compliance.
+- [ ] Address any feedback from the review and make necessary adjustments.
+- [ ] Deploy the updated frontend with the new currency selection component.
+- [ ] Document any new features or changes in the `FRONTEND/README.md`.

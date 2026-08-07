@@ -1,0 +1,53 @@
+/**
+ * CurrencySelector.css
+ *
+ * Scoped styles for the CurrencySelector component.
+ * These styles are intentionally minimal so they compose cleanly with
+ * whatever global theme (Tailwind, shadcn, custom CSS) the host app uses.
+ *
+ * Override any rule by targeting the BEM class names from your own
+ * stylesheet or by passing a `className` prop to <CurrencySelector />.
+ */
+
+.currency-selector {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.currency-selector__label {
+  font-size: 0.875rem;   /* 14 px */
+  font-weight: 500;
+  color: inherit;
+}
+
+.currency-selector__select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 0.5rem 2rem 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;   /* gray-300 */
+  border-radius: 0.375rem;     /* rounded-md */
+  background-color: #ffffff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%236b7280'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 1.25rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: inherit;
+  cursor: pointer;
+  min-width: 14rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.currency-selector__select:focus {
+  outline: none;
+  border-color: #6366f1;       /* indigo-500 */
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+}
+
+.currency-selector__select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #f9fafb;   /* gray-50 */
+}
