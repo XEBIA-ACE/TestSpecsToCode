@@ -1,6 +1,23 @@
-import { RouterProvider } from "react-router";
-import { router } from "./routes";
+```tsx
+import React from 'react';
+import ProfileForm from '../components/ProfileForm/ProfileForm';
 
-export default function App() {
-  return <RouterProvider router={router} />;
-}
+const App: React.FC = () => {
+  const handleProfileSubmit = (data: any) => {
+    console.log('Profile data submitted:', data);
+  };
+
+  return (
+    <div className="App">
+      <header className="App-header">
+        <h1>User Profile</h1>
+      </header>
+      <main>
+        <ProfileForm onSubmit={handleProfileSubmit} />
+      </main>
+    </div>
+  );
+};
+
+export default App;
+```

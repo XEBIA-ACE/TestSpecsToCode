@@ -1,31 +1,47 @@
-/**
- * activation.routes.ts
- *
- * Factory function that wires ActivationService dependencies and returns an
- * Express Router with POST /activate mounted.
- * Parent app mounts this at /api/v1/users.
- */
-
-import { Router } from 'express';
-import type { Database } from 'better-sqlite3';
-import { TokenRepository } from '../repositories/token.repository';
+```typescript
+import express, { Request, Response } from 'express';
 import { UserRepository } from '../repositories/user.repository';
-import { DefaultActivationService } from '../services/activation.service';
-import { ActivationController } from '../controllers/activation.controller';
+import { TokenRepository } from '../repositories/token.repository';
+import { TokenExpiredException, TokenNotFoundException } from '../errors/registration.errors';
 
-export function createActivationRouter(db: Database): Router {
-  const router = Router();
+function createActivationRouter(userRepository: UserRepository, tokenRepository: TokenRepository) {
+  const router = express.Router();
 
-  const controller = new ActivationController(
-    new DefaultActivationService(
-      new TokenRepository(db),
-      new UserRepository(db),
-      db,
-    ),
-  );
+  router.get('/activate/:token', async (req: Request, res: Response) => {
+    const { token } = req.params;
 
-  // POST /api/v1/users/activate
-  router.post('/activate', (req, res) => { void controller.activateAccount(req, res); });
+    try {
+      const activationToken = await tokenRepository.findToken(token);
+
+      if (!activationToken) {
+        throw new TokenNotFoundException('Activation token not found');
+      }
+
+      if (activationToken.isExpired()) {
+        throw new TokenExpiredException('Activation token expired');
+      }
+
+      const user = await userRepository.findUserById(activationToken.userId);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      user.isVerified = true;
+      await userRepository.updateUser(user);
+
+      return res.status(200).json({ message: 'Email successfully verified, account activated.' });
+    } catch (error) {
+      if (error instanceof TokenNotFoundException || error instanceof TokenExpiredException) {
+        return res.status(error instanceof TokenExpiredException ? 410 : 404)
+                  .json({ error: error.message });
+      }
+
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  });
 
   return router;
 }
+
+module.exports = { createActivationRouter };
+```
