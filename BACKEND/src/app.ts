@@ -20,7 +20,6 @@ import { EmailDeliveryPort } from './adapters/email-delivery.port';
 import { UserRepository } from './repositories/user.repository';
 import { SessionRepository } from './repositories/session.repository';
 import { DefaultSessionService } from './services/session.service';
-
 import {
   ValidationError,
   UsernameConflictError,
@@ -45,6 +44,7 @@ import {
   DeletionRequestAlreadyPendingException,
   DeletionRequestNotFoundException,
 } from './errors/account-deletion.errors';
+import { validateProfile } from './middleware/validation.middleware';
 
 function createAppErrorHandler(
   err: unknown,
@@ -87,48 +87,29 @@ function createAppErrorHandler(
   }
 
   if (err instanceof DuplicateDispatchException) {
-    res.status(409).json({ errorCode: 'DUPLICATE_DISPATCH', message: err.message });
+    res.status(409).json({ errorCode: 'DUPLICATE_DISPATCH', message: 'Duplicate dispatch request' });
     return;
   }
 
-  // Default error handler
-  res.status(500).json({ errorCode: 'INTERNAL_SERVER_ERROR', message: 'An unexpected error occurred' });
+  res.status(500).json({ errorCode: 'INTERNAL_ERROR', message: 'An unknown error occurred' });
 }
 
-function emailVerificationMiddleware(req: Request, res: Response, next: NextFunction): void {
-  const user = req.user; // Assuming `req.user` is populated with authenticated user data
-  if (!user.isVerified) {
-    res.status(403).json({ error: 'Email not verified' });
-  } else {
-    next();
-  }
-}
-
-export function createApp(db: Database, redisClient: Redis, otpDeliveryPort: OtpDeliveryPort, emailDeliveryPort: EmailDeliveryPort): express.Application {
+export function createApp(db: Database, redisClient: Redis, otpDeliveryPort: OtpDeliveryPort, emailDeliveryPort: EmailDeliveryPort) {
   const app = express();
 
+  // Middleware
   app.use(cors());
   app.use(express.json());
+  
+  // Attach validation middleware to profile-related routes
+  app.use('/api/v1/users/profiles', validateProfile);
 
-  // Middleware to restrict access to features for unverified emails
-  app.use('/restricted-route', emailVerificationMiddleware);
+  // Set up routes
+  app.use('/api/v1/users', createUserProfileRouter(db));
 
-  app.use('/api/v1/users', createRegistrationRouter(db, redisClient, otpDeliveryPort, emailDeliveryPort));
-  app.use('/api/v1/activate', createActivationRouter(db, redisClient));
-  app.use('/api/v1/admin', createAdminRouter(db));
-  app.use('/api/v1/otp', createOtpRouter(db, otpDeliveryPort));
-  app.use('/api/v1/auth', createAuthRouter(db, redisClient));
-  app.use('/api/v1/password', createPasswordRouter(db, redisClient));
-  app.use('/api/v1/delete', createDeletionRouter(db));
-  app.use('/api/v1/profile', emailVerificationMiddleware, createUserProfileRouter(db));
-  app.use('/api/v1/health', createHealthRouter());
-
+  // Error handling middleware
   app.use(createAppErrorHandler);
-
+  
   return app;
 }
-``` 
-
-### Created new middleware for restricting access in unverified accounts
-
-Note: Assume `req.user` is available for authenticated requests which comes from a preceding authentication middleware.
+```
