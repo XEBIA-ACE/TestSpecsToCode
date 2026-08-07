@@ -1,0 +1,135 @@
+# Kubernetes Deployment manifest for User Management application
+# Zero-downtime strategy: RollingUpdate with maxUnavailable=0
+# Satisfies: "No downtime experienced during deployment"
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-management
+  namespace: production
+  labels:
+    app: user-management
+    version: "1.0.0"
+    feature: profile-view-edit
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+    description: "User Management app with profile viewing and editing (US-001)"
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: user-management
+  # Zero-downtime rolling update: never take a pod down before a new one is Ready
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0   # ensures zero downtime
+      maxSurge: 1         # one extra pod spun up during rollout
+  template:
+    metadata:
+      labels:
+        app: user-management
+        version: "1.0.0"
+    spec:
+      # Graceful shutdown: allow in-flight requests to complete
+      terminationGracePeriodSeconds: 60
+      containers:
+        - name: user-management
+          image: xebia-ace/user-management:latest   # replace tag with CI-built SHA
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: user-management-secrets
+                  key: db-host
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: user-management-secrets
+                  key: db-password
+            - name: EMAIL_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: user-management-config
+                  key: email-service-url
+            - name: AUDIT_LOG_ENABLED
+              value: "true"
+          # Liveness probe: restart container if it becomes unresponsive
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 3
+          # Readiness probe: only route traffic once the app is fully ready
+          # This is the key gate for zero-downtime — old pods stay in rotation
+          # until new pods pass readiness before traffic is shifted.
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+      # Spread pods across nodes for HA
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - user-management
+                topologyKey: kubernetes.io/hostname
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-management-svc
+  namespace: production
+spec:
+  selector:
+    app: user-management
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: ClusterIP
+---
+# HorizontalPodAutoscaler keeps the app responsive under load
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: user-management-hpa
+  namespace: production
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: user-management
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70

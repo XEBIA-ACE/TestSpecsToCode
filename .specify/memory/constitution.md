@@ -1,12 +1,5 @@
-## Non-Functional Requirements and Constraints
-
-- **Performance**: Ensure that currency data refreshes within seconds of an update, with no lag visible to the user.
-- **Scalability**: Support for up to 100 concurrent users accessing real-time data.
-- **Legal & Compliance**: Ensure GDPR compliance in data handling and user data operations.
-- **Reliability**: Commit to a system uptime of 99.95%, minimizing downtimes during updates.
-- **Security**: Implement secure API calls and data storage to prevent breaches and vulnerabilities.
-
-## Constraints
-
-- Must use existing service architecture for ease of integration.
-- Budget constraints may limit the scope of UI enhancements.
+- Consistency with existing architectural design and alignment with established coding standards.
+- Compliance with security practices to prevent vulnerabilities such as XSS or injection attacks.
+- Documentation and audits must comply with applicable data privacy laws.
+- Unit and integration test coverage must be at or above 80%.
+- User-facing changes should enhance user experience and comply with WCAG 2.1 AA.

@@ -1,0 +1,91 @@
+{
+  "story": "US-001 — View and Edit Profile Information",
+  "application": "User_Management",
+  "review_type": "Architectural Review for Profile Management",
+  "cast_blast_radius": 0,
+  "cast_remediation_priority": "LOW",
+  "analysis": {
+    "existing_endpoints_reviewed": [
+      {
+        "route": "GET /api/users/{id}",
+        "action": "ENHANCE",
+        "rationale": "Already returns user data; add ProfileDto projection to expose only the four profile fields."
+      },
+      {
+        "route": "PUT /api/users/{id}",
+        "action": "NO_CHANGE",
+        "rationale": "Administrative full-update endpoint; must not be used for profile edits to enforce field-level restrictions."
+      },
+      {
+        "route": "GET /api/users",
+        "action": "NO_CHANGE",
+        "rationale": "Bulk listing; not relevant to profile management."
+      },
+      {
+        "route": "POST /api/auth/login",
+        "action": "NO_CHANGE",
+        "rationale": "Authentication only; out of scope."
+      },
+      {
+        "route": "POST /api/auth/register",
+        "action": "NO_CHANGE",
+        "rationale": "Registration only; out of scope."
+      }
+    ],
+    "new_endpoints": [
+      {
+        "route": "PATCH /api/users/{id}/profile",
+        "action": "CREATE",
+        "rationale": "Narrowly-scoped endpoint accepting only { name }. Owns validation, XSS sanitisation, audit logging, and email notification."
+      }
+    ],
+    "database_changes": [
+      {
+        "table": "users",
+        "action": "NO_SCHEMA_CHANGE",
+        "notes": "Existing columns (name, email, registration_date, account_status) satisfy requirements. Only 'name' is mutable via the profile endpoint."
+      },
+      {
+        "table": "audit_logs",
+        "action": "CREATE_OR_EXTEND",
+        "notes": "Requires columns: id, user_id (FK), field, old_value, new_value, changed_at, ip_address, user_agent. Create migration if table absent."
+      }
+    ]
+  },
+  "decision": "Enhance existing GET endpoint with a ProfileDto projection and create a new PATCH /api/users/{id}/profile endpoint for name updates.",
+  "components_affected": [
+    { "name": "ProfileController", "action": "CREATE" },
+    { "name": "ProfileDto", "action": "CREATE" },
+    { "name": "UpdateProfileNameRequest", "action": "CREATE" },
+    { "name": "UserService", "action": "MODIFY" },
+    { "name": "AuditLogService", "action": "CREATE_OR_MODIFY" },
+    { "name": "EmailService", "action": "MODIFY" },
+    { "name": "audit_logs DB migration", "action": "CREATE" },
+    { "name": "Unit tests", "action": "CREATE" }
+  ],
+  "non_functional_requirements": {
+    "page_load_target_ms": 2000,
+    "accessibility_standard": "WCAG 2.1 AA",
+    "xss_mitigation": "Server-side HTML encoding + Content-Security-Policy header",
+    "audit_logging": "Insert into audit_logs on every successful name change",
+    "email_notification": "Async dispatch after successful DB write",
+    "unit_test_coverage_minimum_pct": 80
+  },
+  "risks": [
+    {
+      "risk": "audit_logs table missing in production",
+      "likelihood": "MEDIUM",
+      "mitigation": "Include migration in deployment checklist"
+    },
+    {
+      "risk": "Email service unavailable at update time",
+      "likelihood": "MEDIUM",
+      "mitigation": "Use async queue with retry; do not block HTTP response"
+    },
+    {
+      "risk": "XSS via name field",
+      "likelihood": "LOW",
+      "mitigation": "Enforce server-side encoding; add integration test"
+    }
+  ]
+}
