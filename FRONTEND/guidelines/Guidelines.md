@@ -1,61 +1,66 @@
-**Add your own guidelines here**
-<!--
+```markdown
+# Frontend Development Guidelines
 
-System Guidelines
+## Introduction
 
-Use this file to provide the AI with rules and guidelines you want it to follow.
-This template outlines a few examples of things you can add. You can add your own sections and format it to suit your needs
+Welcome to the development guidelines for our frontend system. This document provides instructions and standards for implementing features and maintaining code quality. Please follow these guidelines to ensure consistency and maintainability across the codebase.
 
-TIP: More context isn't always better. It can confuse the LLM. Try and add the most important rules you need
+## Data Validation Guidelines
 
-# General guidelines
+Data validation is a crucial part of our frontend application. It ensures that the data being submitted by users is correct, complete, and safe. Implementing proper validation not only helps maintain data integrity but also enhances the user experience by preventing invalid data submissions.
 
-Any general rules you want the AI to follow.
-For example:
+### General Validation Rules
 
-* Only use absolute positioning when necessary. Opt for responsive and well structured layouts that use flexbox and grid by default
-* Refactor code as you go to keep code clean
-* Keep file sizes small and put helper functions and components in their own files.
+- **Mandatory Fields**: Ensure that all fields marked as mandatory are checked for completion before submission. The UI should provide immediate feedback for any missing mandatory fields.
+  
+- **Field Length and Format**: Verify that text fields adhere to specific length and format requirements. For example, email fields must comply with standard email format validations.
+  
+- **Data Type**: Validate that inputs match the expected data type, such as integers for age fields and correct formats for dates.
 
---------------
+### Implementation Strategy
 
-# Design system guidelines
-Rules for how the AI should make generations look like your company's design system
+1. **Client-Side Validation**: Implement instant feedback for users by using JavaScript or Form Validation libraries to validate inputs on-the-fly before submission. 
 
-Additionally, if you select a design system to use in the prompt box, you can reference
-your design system's components, tokens, variables and components.
-For example:
+   Example:
+   ```javascript
+   if (emailInput.value === '' || !isValidEmail(emailInput.value)) {
+       showError(emailInput, 'Please enter a valid email address.');
+   }
+   ```
 
-* Use a base font-size of 14px
-* Date formats should always be in the format “Jun 10”
-* The bottom toolbar should only ever have a maximum of 4 items
-* Never use the floating action button with the bottom toolbar
-* Chips should always come in sets of 3 or more
-* Don't use a dropdown if there are 2 or fewer options
+2. **Error Messaging Strategy**: Design clear and concise error messages. Place error messages immediately next to the respective input fields to which they relate.
 
-You can also create sub sections and add more specific details
-For example:
+   Example:
+   - If a user enters an invalid email:
+     ```html
+     <span class="error" id="email-error">Please enter a valid email address.</span>
+     ```
 
+3. **User Feedback and Success Handling**: Once validation passes, allow users to proceed to the next step or submit the form. Ensure forms are reset or display a confirmation message upon successful submission.
 
-## Button
-The Button component is a fundamental interactive element in our design system, designed to trigger actions or navigate
-users through the application. It provides visual feedback and clear affordances to enhance user experience.
+### Error Message Guidelines
 
-### Usage
-Buttons should be used for important actions that users need to take, such as form submissions, confirming choices,
-or initiating processes. They communicate interactivity and should have clear, action-oriented labels.
+- Error messages should be descriptive but concise.
+- Use everyday language that can be easily understood by the user.
+- Place error messages near the input field to which they relate so users can easily identify where corrections are needed.
 
-### Variants
-* Primary Button
-  * Purpose : Used for the main action in a section or page
-  * Visual Style : Bold, filled with the primary brand color
-  * Usage : One primary button per section to guide users toward the most important action
-* Secondary Button
-  * Purpose : Used for alternative or supporting actions
-  * Visual Style : Outlined with the primary color, transparent background
-  * Usage : Can appear alongside a primary button for less important actions
-* Tertiary Button
-  * Purpose : Used for the least important actions
-  * Visual Style : Text-only with no border, using primary color
-  * Usage : For actions that should be available but not emphasized
--->
+### Example Error Message Placements
+
+- **Below Input Fields**: Place error messages directly below input fields for better visibility.
+- **Color and Icon Usage**: Use red text color and icons (e.g., an exclamation mark) to grab user attention without being overly aggressive.
+
+### Consistent Validation Patterns
+
+Utilize reusable validation functions across forms to ensure consistent behavior and to reduce code duplication. This pattern keeps our codebase DRY (Don't Repeat Yourself) and reduces maintenance overhead.
+
+### Tools and Libraries
+
+- Utilize `React` for component-based validation logic.
+- Use popular libraries such as `Formik` and `Yup` to handle form state and schema validation seamlessly.
+
+## Conclusion
+
+By adhering to these validation guidelines, developers can ensure data integrity and provide a seamless user interface. Consistent and thorough validation contributes significantly to a positive user experience and reduces potential errors during form submissions. Please ensure these guidelines are followed during development and updates to related components.
+
+For further questions or clarifications, feel free to contact the team lead or the documentation manager.
+```
