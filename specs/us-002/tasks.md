@@ -1,17 +1,10 @@
-1. **Backend Development:**
-   - Implement/update REST API endpoints for profile editing.
-   - Unit test for backend services ensuring validations and successful updates.
-
-2. **Frontend Development:**
-   - Develop UI components for profile editing (name, email, password).
-   - Integrate APIs with frontend to show confirmation on successful update.
-
-3. **Testing:**
-   - Perform integration testing to ensure backend and frontend interaction meets the acceptance criteria.
-
-4. **Performance Optimization:**
-   - Analyze and optimize API response times to maintain performance standards.
-
-5. **Code Review and Documentation:**
-   - Conduct code reviews to affirm best practices are followed.
-   - Document new APIs and any changes in the profile management logic.
+1. Extend PasswordController (2959) with new methods for password change functionality.
+2. Modify BcryptPasswordHasher (3005) to handle optional Argon2 hashing.
+3. Update PasswordPolicyEvaluator (3012) for complexity validation.
+4. Configure Redis settings to enable rate limiting.
+5. Add session invalidation logic post-password change.
+6. Integrate email sending functionality for confirmations.
+7. Enhance PasswordInput components (2496, 2635) for better UX, including show/hide toggles and complexity feedback.
+8. Implement unit tests across the modified components.
+9. Perform performance testing to ensure password changes before 3 seconds limit.
+10. Conduct accessibility validation ensuring compliance with WCAG 2.1 AA standards.

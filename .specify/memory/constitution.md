@@ -1,5 +1,7 @@
-- **Code Quality:** Follow coding standards and maintain clean, readable code.
-- **Testing:** Ensure comprehensive unit and integration tests are implemented.
-- **Security:** Ensure that sensitive data, like passwords, are encrypted and comply with relevant security standards.
-- **Documentation:** Maintain detailed code documentation and user guides for any changes made.
-- **Performance:** Ensure that solutions are optimized for performance, with response times within acceptable limits.
+### Quality Standards and Design Principles
+
+- **Security**: All password data must be securely hashed and encrypted using modern standards (bcrypt/Argon2), with security tested rigorously.
+- **Performance**: Password operations must complete in under 3 seconds, requiring efficient code paths and minimal server-side processing.
+- **Compliance**: UI components must meet WCAG 2.1 AA accessibility standards, ensuring inclusive design.
+- **Test Coverage**: Minimum unit test coverage across the codebase should be 80%, with tests covering edge cases and standard use flows.
+- **Code Quality**: Code should follow established best practices for readability, maintainability, and efficiency, undergoing thorough peer reviews prior to merging.
